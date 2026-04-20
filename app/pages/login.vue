@@ -22,7 +22,6 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <UiLabel for="password">Contraseña</UiLabel>
-                <NuxtLink to="/forgot-password" class="text-xs text-primary-600 hover:underline">¿Olvidaste tu contraseña?</NuxtLink>
               </div>
               <UiInput id="password" type="password" v-model="form.password" required placeholder="••••••••" />
             </div>
@@ -34,6 +33,8 @@
             <UiButton type="submit" class="w-full bg-primary hover:bg-primary-700 text-white mt-6" :disabled="isLoading">
               {{ isLoading ? 'Ingresando...' : 'Iniciar Sesión' }}
             </UiButton>
+            <NuxtLink to="/forgot-password" class="text-xs text-primary-600 hover:underline">¿Olvidaste tu contraseña?</NuxtLink>
+
           </form>
         </UiCardContent>
         <UiCardFooter class="justify-center border-t border-stone-100 pt-6">
