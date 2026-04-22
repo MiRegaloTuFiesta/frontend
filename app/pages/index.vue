@@ -20,30 +20,32 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="relative px-4 py-20 md:py-32 overflow-hidden">
-      <!-- Decoraciones de fondo -->
-      <div class="absolute top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary-100/50 rounded-full blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3"></div>
-      <div class="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-zinc-200/50 rounded-full blur-3xl opacity-60 -translate-x-1/3 translate-y-1/3"></div>
+    <section class="relative px-4 py-20 md:py-32 overflow-hidden flex items-center justify-center min-h-[85vh]">
+      <!-- Background Image -->
+      <div class="absolute inset-0 z-0">
+        <img src="/images/hero.webp" alt="Fiesta y celebración" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-stone-950/75"></div> <!-- Overlay oscuro para constraste -->
+      </div>
 
-      <div class="container mx-auto text-center max-w-4xl pt-10">
-        <span class="px-4 py-1.5 rounded-full bg-primary-100 text-primary-800 text-sm font-semibold tracking-wide mb-6 inline-block">
+      <div class="container mx-auto text-center max-w-4xl relative z-10 pt-10">
+        <span class="px-4 py-1.5 rounded-full bg-primary-500/20 text-primary-200 border border-primary-500/30 text-sm font-semibold tracking-wide mb-6 inline-block backdrop-blur-sm">
           El alma de la celebración
         </span>
-        <h1 class="text-4xl md:text-6xl font-extrabold text-zinc-900 tracking-tight leading-tight mb-8">
-          Un regalo con sentido es aquel que se <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400">vive, comparte y recuerda</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-8 drop-shadow-lg text-balance">
+          Un regalo con sentido es aquel que se <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-200">vive, comparte y recuerda</span>
         </h1>
-        <p class="text-lg md:text-xl text-zinc-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+        <p class="text-lg md:text-xl text-stone-300 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
           Transformamos el acto de regalar en un esfuerzo colectivo. No es solo "pedir dinero"; es compartir el sueño de una noche especial.
         </p>
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <UiButton size="lg" class="w-full sm:w-auto text-lg h-14 px-8 bg-primary hover:bg-primary-700 text-white shadow-xl shadow-primary/20 transition-all hover:scale-105" as="a" href="/register">
+          <UiButton size="lg" class="w-full sm:w-auto text-lg h-14 px-8 bg-primary hover:bg-primary-600 text-white shadow-xl shadow-primary/20 transition-all hover:scale-105 border-0" as="a" href="/register">
             Comenzar mi evento gratis
           </UiButton>
-          <UiButton size="lg" variant="outline" class="w-full sm:w-auto text-lg h-14 px-8 border-zinc-300 hover:bg-zinc-100 text-zinc-700" as="a" href="#historia">
+          <UiButton size="lg" class="w-full sm:w-auto text-lg h-14 px-8 bg-transparent border-2 border-white/40 hover:bg-white/15 text-white shadow-none backdrop-blur-sm hover:border-white/80 transition-all font-medium" as="a" href="#historia">
             Nuestra historia
           </UiButton>
         </div>
-        <p class="mt-6 text-sm text-zinc-500">Sin compromisos vacíos • Cambiamos lo material por lo emocional</p>
+        <p class="mt-8 text-sm text-stone-400 font-medium tracking-wide">Sin compromisos vacíos &bull; Cambiamos lo material por lo emocional</p>
       </div>
     </section>
 
