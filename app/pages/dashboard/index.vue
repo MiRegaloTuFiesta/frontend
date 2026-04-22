@@ -196,8 +196,8 @@
                     v-for="wish in evt.wishes" 
                     :key="wish.id" 
                     class="p-4 border border-stone-200 rounded-xl relative group"
-                    :class="wish.status !== 'completed' ? 'cursor-pointer hover:border-primary-300 hover:bg-stone-50 transition-all' : 'opacity-80'"
-                    @click="wish.status !== 'completed' && openWishModal(evt.id, wish)"
+                    :class="wish.status !== 'completed' ? 'cursor-pointer hover:border-primary-300 hover:bg-stone-50 transition-all' : 'cursor-pointer opacity-90 hover:border-primary-400 hover:shadow-md transition-all'"
+                    @click="wish.status !== 'completed' ? openWishModal(evt.id, wish) : openWishContributionsModal(wish)"
                   >
                     <div v-if="wish.status === 'completed'" class="absolute -top-2 -right-2 bg-primary-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">Completo</div>
                     <h4 class="font-semibold text-stone-900">{{ wish.name }}</h4>
@@ -212,6 +212,9 @@
                     </div>
                     <div v-if="wish.status !== 'completed'" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <span class="text-[10px] bg-white border border-stone-200 px-2 py-0.5 rounded shadow-sm text-stone-400 font-bold uppercase">Click para editar</span>
+                    </div>
+                    <div v-else class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span class="text-[10px] bg-white border border-primary-200 px-2 py-0.5 rounded shadow-sm text-primary-600 font-bold uppercase">Ver detalles</span>
                     </div>
                   </div>
                 </div>
@@ -304,6 +307,39 @@
             </UiButton>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal Detalles de Compra (Completed Wish) -->
+    <div v-if="isContributionsModalOpen && selectedWishContributions" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+          <div>
+            <h3 class="text-lg font-bold text-stone-900">Detalles de Aportes</h3>
+            <p class="text-xs text-stone-500 font-medium">{{ selectedWishContributions.name }}</p>
+          </div>
+          <button @click="closeContributionsModal" class="text-stone-400 hover:text-stone-600 text-2xl transition-colors">&times;</button>
+        </div>
+        <div class="p-6 max-h-[60vh] overflow-y-auto bg-stone-100/50">
+          <div v-if="selectedWishContributions.contributions?.length > 0" class="space-y-4">
+            <div v-for="contrib in selectedWishContributions.contributions" :key="contrib.id" class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+              <div>
+                <p class="text-sm font-bold text-stone-900">{{ contrib.donor_name }}</p>
+                <p class="text-xs text-stone-500">{{ contrib.email || 'Sin correo asociado' }}</p>
+              </div>
+              <div class="bg-primary-50 px-4 py-2 rounded-lg border border-primary-100 self-start sm:self-auto">
+                <p class="text-xs text-primary-600 font-bold uppercase mb-0.5">Monto Aportado</p>
+                <p class="text-lg font-black text-primary-800 leading-none">${{ formatNumber(contrib.amount) }}</p>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-8 text-stone-400">
+            <p>No se encontraron detalles de aportes registrados para este regalo.</p>
+          </div>
+        </div>
+        <div class="p-4 border-t border-stone-100 bg-white flex justify-end">
+          <UiButton @click="closeContributionsModal" class="bg-stone-900 text-white hover:bg-stone-800">Cerrar Detalles</UiButton>
+        </div>
       </div>
     </div>
 
@@ -562,6 +598,19 @@ const selectedEventId = ref<number | null>(null);
 const isCreatingWish = ref(false);
 const wishAmountError = ref('');
 const newWish = ref({ name: '', description: '', liquid_amount: '', target_amount: 0, is_open: false });
+
+const isContributionsModalOpen = ref(false);
+const selectedWishContributions = ref<any>(null);
+
+const openWishContributionsModal = (wish: any) => {
+  selectedWishContributions.value = wish;
+  isContributionsModalOpen.value = true;
+};
+
+const closeContributionsModal = () => {
+  isContributionsModalOpen.value = false;
+  selectedWishContributions.value = null;
+};
 
 const isNotesModalOpen = ref(false);
 const selectedEventNotes = ref<any>(null);
