@@ -116,10 +116,24 @@
                   <UiButton @click="openEditModal(evt)" variant="outline" size="sm" class="text-stone-600">
                     ✏️ Editar
                   </UiButton>
-                  <UiButton as="a" :href="'/evento/' + evt.uuid" variant="outline" target="_blank" size="sm" class="flex items-center gap-2">
-                    Ver Público
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                  </UiButton>
+                  <div class="relative align-middle items-center flex">
+                    <UiButton @click="toggleShareMenu(evt.id)" variant="outline" size="sm" class="flex items-center gap-2">
+                      Ver Público
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </UiButton>
+                    <div v-if="activeShareMenu === evt.id" class="absolute right-0 top-full mt-2 p-3 bg-white border border-stone-200 shadow-xl rounded-xl z-50 w-72 origin-top-right">
+                      <p class="text-xs font-semibold text-stone-500 mb-2 uppercase">Comparte tu evento</p>
+                      <div class="flex items-center gap-2 mb-2">
+                        <input type="text" readonly :value="getPublicUrl(evt.uuid)" class="flex-1 bg-stone-50 border border-stone-200 text-xs rounded p-2 text-stone-600 focus:outline-none" />
+                        <UiButton @click="copyToClipboard(getPublicUrl(evt.uuid))" variant="default" size="sm" class="px-3 shrink-0 bg-primary-600 hover:bg-primary-700 text-white border-0">
+                          Copiar
+                        </UiButton>
+                      </div>
+                      <UiButton as="a" :href="'/evento/' + evt.uuid" target="_blank" variant="outline" size="sm" class="w-full text-stone-600 flex justify-center">
+                        Abrir página del evento
+                      </UiButton>
+                    </div>
+                  </div>
                   <UiButton @click="deleteEvent(evt)" variant="outline" size="sm" class="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700">
                     🗑️
                   </UiButton>
@@ -427,6 +441,34 @@ const handleRegionChange = async () => {
 // ─── CREATE EVENT ─────────────────────────────────────────────────────────────
 const newEvent = ref({ name: '', date: '', category_id: null, city_id: null as number | null, address: '', is_location_public: true, creator_budget: '', requests_internal_service: false });
 const isCreatingEvent = ref(false);
+
+// ─── SHARE MENU ───────────────────────────────────────────────────────────────
+const activeShareMenu = ref<number | null>(null);
+
+const toggleShareMenu = (eventId: number) => {
+  if (activeShareMenu.value === eventId) {
+    activeShareMenu.value = null;
+  } else {
+    activeShareMenu.value = eventId;
+  }
+};
+
+const getPublicUrl = (uuid: string) => {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/evento/${uuid}`;
+  }
+  return `/evento/${uuid}`;
+};
+
+const copyToClipboard = async (url: string) => {
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('URL copiada al portapapeles');
+    activeShareMenu.value = null;
+  } catch (err) {
+    console.error('Error al copiar', err);
+  }
+};
 
 const createEvent = async () => {
   if (!newEvent.value.name || !newEvent.value.date) return;
