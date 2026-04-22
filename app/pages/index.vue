@@ -54,8 +54,8 @@
           <div class="w-full md:w-1/2 relative">
             <div class="aspect-square bg-zinc-100 rounded-3xl overflow-hidden shadow-2xl relative z-10">
               <!-- Usaremos un gradiente artístico que evoca una fiesta/DJ ya que mantenemos el estilo actual -->
-              <div class="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-zinc-200 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-32 h-32 text-primary-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+              <div class="absolute inset-0 overflow-hidden">
+                <img src="/images/dj-rossbel-fundador.webp" alt="DJ Rossbel - Fundador de Mi Regalo, Tu Fiesta" class="w-full h-full object-cover" />
               </div>
             </div>
             <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-primary-100 rounded-2xl -z-0 rotate-12"></div>
@@ -69,7 +69,7 @@
               <p class="not-italic font-semibold text-primary-700">No fue un regalo convencional: fue el ritmo de la noche, fueron las risas y la alegría compartida.</p>
             </div>
             <div class="pt-4">
-              <p class="text-zinc-700 font-medium italic">— Fundador de Mi Regalo, Tu Fiesta</p>
+              <p class="text-zinc-700 font-medium italic">— DJ Rossbel, Fundador de Mi Regalo, Tu Fiesta</p>
             </div>
           </div>
         </div>
