@@ -24,6 +24,9 @@
         >
           <span class="text-lg" v-html="tab.icon"></span>
           {{ tab.name }}
+          <span v-if="tab.id === 'reports' && pendingReports > 0" class="ml-auto bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            {{ pendingReports }}
+          </span>
         </NuxtLink>
       </nav>
 
@@ -79,12 +82,19 @@ const tabs = [
   { id: 'users', name: 'Usuarios', icon: '👥', path: '/admin/users' },
   { id: 'payments', name: 'Pagos Recibidos', icon: '💸', path: '/admin/payments' },
   { id: 'categories', name: 'Categorías', icon: '🏷️', path: '/admin/categories' },
+  { id: 'reports', name: 'Reportes', icon: '⚐', path: '/admin/reports' },
   { id: 'settings', name: 'Configuración', icon: '⚙️', path: '/admin/settings' },
 ];
 
 const pageTitle = computed(() => {
   return tabs.find(t => t.path === route.path)?.name || 'Panel Admin';
 });
+
+// Pending reports for badge
+const { data: adminStats } = await useFetch<any>(`${config.public.apiBase}/api/admin/stats`, {
+  headers: { Authorization: `Bearer ${token.value}` }
+});
+const pendingReports = computed(() => adminStats.value?.summary?.pending_reports ?? 0);
 
 if (!token.value) {
   router.push('/login');

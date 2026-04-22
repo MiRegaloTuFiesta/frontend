@@ -102,34 +102,24 @@
           <UiCard v-for="evt in events" :key="evt.id" class="border-stone-200 shadow-sm">
             <UiCardHeader>
               <div class="flex justify-between items-start">
-                <div>
+                <div class="flex-1">
                   <UiCardTitle class="text-xl">{{ evt.name }}</UiCardTitle>
-                  <UiCardDescription>Fecha: {{ new Date(evt.date + 'T12:00:00').toLocaleDateString('es-CL') }} • Estado: 
-
-                    <span :class="{
-                      'text-amber-600 font-semibold': evt.status === 'pending', 
-                      'text-primary-600 font-semibold': evt.status === 'approved',
-                      'text-rose-600 font-semibold': evt.status === 'rejected'
-                    }">
-                      {{ evt.status === 'pending' ? 'Pendiente de Aprobación' : (evt.status === 'approved' ? 'Aprobado' : 'Rechazado') }}
-                    </span>
+                  <UiCardDescription>
+                    Fecha: {{ new Date(evt.date + 'T12:00:00').toLocaleDateString('es-CL') }}
                     <span v-if="evt.city" class="block text-xs text-stone-400 mt-1">📍 {{ evt.city.name }}, {{ evt.city.region?.name }}</span>
                     <div v-if="evt.requests_internal_service" class="mt-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-bold uppercase tracking-wider">
                       🔧 Servicio Solicitado{{ evt.service_cost > 0 ? ': $' + formatNumber(evt.service_cost) : '' }}
                     </div>
-                    <div v-if="evt.status === 'rejected' && evt.admin_notes" class="mt-3 p-4 bg-rose-50 border border-rose-100 rounded-xl">
-                      <p class="text-[10px] text-rose-400 font-bold uppercase mb-1">Motivo del Rechazo:</p>
-                      <p class="text-sm text-rose-700 font-medium">{{ evt.admin_notes }}</p>
-                    </div>
                   </UiCardDescription>
                 </div>
-                <!-- Only show the link if approved -->
-                <UiButton v-if="evt.status === 'approved'" as="a" :href="'/evento/' + evt.uuid" variant="outline" target="_blank" size="sm" class="flex items-center gap-2">
-                  Ver Público
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </UiButton>
-                <div v-else class="flex items-center gap-2">
-                  <span class="text-sm text-stone-400 bg-stone-100 px-3 py-1.5 rounded-md border border-stone-200">En revisión</span>
+                <div class="flex items-center gap-2 shrink-0 ml-4">
+                  <UiButton @click="openEditModal(evt)" variant="outline" size="sm" class="text-stone-600">
+                    ✏️ Editar
+                  </UiButton>
+                  <UiButton as="a" :href="'/evento/' + evt.uuid" variant="outline" target="_blank" size="sm" class="flex items-center gap-2">
+                    Ver Público
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  </UiButton>
                   <UiButton @click="deleteEvent(evt)" variant="outline" size="sm" class="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700">
                     🗑️
                   </UiButton>
@@ -139,14 +129,11 @@
             <UiCardContent>
               <div class="bg-zinc-50 p-4 rounded-lg flex flex-wrap gap-6 items-center border border-zinc-100 mb-6">
                 <div>
-                  <span class="text-xs text-zinc-500 uppercase font-semibold">Recaudado / Meta Efectiva</span>
+                  <span class="text-xs text-zinc-500 uppercase font-semibold">Recaudado / Meta</span>
                   <div class="text-2xl font-bold text-primary-700">
                     ${{ formatNumber(evt.collected_amount) }} 
-                    <span class="text-base text-zinc-400 font-normal">/ ${{ formatNumber(evt.total_price - (evt.manual_payments_sum_amount || 0)) }}</span>
+                    <span class="text-base text-zinc-400 font-normal">/ ${{ formatNumber(evt.total_price) }}</span>
                   </div>
-                  <p v-if="evt.manual_payments_sum_amount > 0" class="text-[10px] text-zinc-400 italic">
-                    Meta original: ${{ formatNumber(evt.total_price) }} | Abonos: ${{ formatNumber(evt.manual_payments_sum_amount) }}
-                  </p>
                 </div>
                 <div>
                   <span class="text-xs text-zinc-500 uppercase font-semibold">Excedente (Overflow)</span>
@@ -157,10 +144,29 @@
                   <span class="text-xs text-zinc-500 uppercase font-semibold">Ejecutivo asignado</span>
                   <div class="text-sm font-bold text-zinc-900">{{ evt.assigned_admin.name }}</div>
                 </div>
-                <div v-if="evt.admin_notes" class="ml-auto">
+                <div v-if="evt.admin_notes && evt.status === 'approved'" class="ml-auto">
                   <UiButton size="sm" variant="outline" class="bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 font-bold" @click="openAdminNotes(evt)">
                     📋 Ver Detalles del Ejecutivo
                   </UiButton>
+                </div>
+              </div>
+
+              <!-- Servicio tracking (informativo, separado de la recaudación) -->
+              <div v-if="evt.requests_internal_service && evt.service_cost > 0" class="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                <p class="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-3">📋 Estado de Contratación de Servicios — Pagos del Organizador</p>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                  <div class="bg-white rounded-lg p-3 border border-amber-100">
+                    <p class="text-[10px] text-amber-600 uppercase font-bold">Costo Servicio</p>
+                    <p class="text-lg font-extrabold text-amber-800">${{ formatNumber(evt.service_cost) }}</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-3 border border-amber-100">
+                    <p class="text-[10px] text-amber-600 uppercase font-bold">Abonado</p>
+                    <p class="text-lg font-extrabold text-emerald-700">${{ formatNumber(evt.service_payments_sum_amount || 0) }}</p>
+                  </div>
+                  <div class="bg-white rounded-lg p-3 border border-amber-100">
+                    <p class="text-[10px] text-amber-600 uppercase font-bold">Pendiente</p>
+                    <p class="text-lg font-extrabold text-rose-700">${{ formatNumber(Math.max(0, evt.service_cost - (evt.service_payments_sum_amount || 0))) }}</p>
+                  </div>
                 </div>
               </div>
 
@@ -211,7 +217,7 @@
       </div>
     </main>
 
-    <!-- Modal agregar deseo -->
+    <!-- Modal agregar/editar deseo -->
     <div v-if="isWishModalOpen" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         <div class="p-6 border-b border-stone-100 flex justify-between items-center">
@@ -233,16 +239,36 @@
             <UiLabel for="isOpenAmount" class="text-sm font-semibold text-stone-700 cursor-pointer">¿Deseas que el monto sea abierto? (El invitado elige cuánto aportar)</UiLabel>
           </div>
           
-          <div v-if="!newWish.is_open" class="space-y-2 p-4 bg-primary-50 rounded-xl border border-primary-100 animate-in fade-in zoom-in duration-200">
+          <div v-if="!newWish.is_open" class="space-y-3 p-4 bg-primary-50 rounded-xl border border-primary-100 animate-in fade-in zoom-in duration-200">
             <UiLabel for="liquidAmount" class="text-primary-900 font-bold">¿Cuánto quieres recibir líquido? (CLP)</UiLabel>
+            
+            <!-- Quick-select buttons -->
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="val in [5000, 10000, 15000, 20000, 25000]"
+                :key="val"
+                type="button"
+                @click="selectQuickAmount(val)"
+                class="px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                :class="Number(newWish.liquid_amount) === val 
+                  ? 'bg-primary text-white border-primary shadow-sm' 
+                  : 'bg-white text-stone-600 border-stone-200 hover:border-primary hover:text-primary'"
+              >
+                ${{ formatNumber(val) }}
+              </button>
+            </div>
+
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-primary-600 font-bold">$</span>
-              <UiInput id="liquidAmount" type="number" v-model="newWish.liquid_amount" @input="updateCalculations" class="pl-8 border-primary-200 focus:ring-primary" placeholder="Ej: 10000" :required="!newWish.is_open" />
+              <UiInput id="liquidAmount" type="number" v-model="newWish.liquid_amount" @input="updateCalculations" class="pl-8 border-primary-200 focus:ring-primary" placeholder="O ingresa un valor personalizado" :required="!newWish.is_open" />
             </div>
+
+            <!-- Min amount error -->
+            <p v-if="wishAmountError" class="text-xs text-red-600 font-semibold">{{ wishAmountError }}</p>
             
             <div v-if="calculation" class="mt-3 space-y-1 text-xs">
               <div class="flex justify-between text-stone-600">
-                <span>Comisión Plataforma ({{ calculation.platform_fee_percent || '5' }}%)</span>
+                <span>Comisión Plataforma</span>
                 <span>${{ formatNumber(calculation.platform_fee) }}</span>
               </div>
               <div class="flex justify-between text-stone-600">
@@ -266,6 +292,72 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal Editar Evento -->
+    <div v-if="isEditEventModalOpen && editingEvent" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden my-auto">
+        <div class="p-6 border-b border-stone-100 flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-bold">Editar Evento</h3>
+            <p class="text-xs text-stone-400">{{ editingEvent.name }}</p>
+          </div>
+          <button @click="closeEditModal" class="text-stone-400 hover:text-stone-600 text-2xl">&times;</button>
+        </div>
+        <form @submit.prevent="saveEditedEvent" class="p-6 space-y-4">
+          <div class="space-y-2">
+            <UiLabel>Nombre del Evento</UiLabel>
+            <UiInput v-model="editEventForm.name" placeholder="Ej: Boda de Ana y Juan" required />
+          </div>
+          <div class="space-y-2">
+            <UiLabel>Fecha</UiLabel>
+            <UiInput type="date" v-model="editEventForm.date" required />
+          </div>
+          <div class="space-y-2">
+            <UiLabel>Categoría</UiLabel>
+            <select v-model="editEventForm.category_id" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none">
+              <option :value="null">Sin categoría</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <UiLabel>Región</UiLabel>
+            <select v-model="editRegionId" @change="handleEditRegionChange" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none">
+              <option :value="null">Seleccionar región...</option>
+              <option v-for="reg in regions" :key="reg.id" :value="reg.id">{{ reg.name }}</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <UiLabel>Ciudad</UiLabel>
+            <select v-model="editEventForm.city_id" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none" :disabled="!editRegionId || isLoadingEditCities">
+              <option :value="null">{{ isLoadingEditCities ? 'Cargando...' : 'Seleccionar ciudad...' }}</option>
+              <option v-for="city in editCitiesList" :key="city.id" :value="city.id">{{ city.name }}</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <UiLabel>Dirección (Opcional)</UiLabel>
+            <UiInput v-model="editEventForm.address" placeholder="Ej: Av. Las Condes 123" />
+          </div>
+          <div class="flex items-center gap-2 py-1">
+            <input type="checkbox" id="editIsPublic" v-model="editEventForm.is_location_public" class="w-4 h-4 rounded border-stone-300 text-primary-600 focus:ring-primary" />
+            <UiLabel for="editIsPublic" class="text-xs font-semibold text-stone-700 cursor-pointer">¿Mostrar ubicación en página pública?</UiLabel>
+          </div>
+          <div class="space-y-2 pt-2 border-t border-stone-100">
+            <UiLabel>Meta de Recaudación (CLP)</UiLabel>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-bold">$</span>
+              <UiInput type="number" v-model="editEventForm.creator_budget" placeholder="Ej: 500000" class="pl-8" />
+            </div>
+          </div>
+          <div class="pt-4 flex justify-end gap-3">
+            <UiButton type="button" variant="outline" @click="closeEditModal">Cancelar</UiButton>
+            <UiButton type="submit" class="bg-primary text-white" :disabled="isSavingEvent">
+              {{ isSavingEvent ? 'Guardando...' : 'Guardar Cambios' }}
+            </UiButton>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Modal notas admin -->
     <div v-if="isNotesModalOpen && selectedEventNotes" class="fixed inset-0 z-50 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-zinc-100">
@@ -293,7 +385,6 @@
 import { ref } from 'vue';
 import { useCookie, useRouter, useRoute, useHead, useFetch } from '#imports';
 
-// SEO head for dashboard
 useHead({ title: 'Dashboard - Mi Regalo, Tu Fiesta' });
 
 const router = useRouter();
@@ -307,20 +398,17 @@ if (!token.value) {
 const config = useRuntimeConfig();
 
 const { data: events, pending: pendingEvents, refresh } = await useFetch<any>(`${config.public.apiBase}/api/events`, {
-  headers: {
-    Authorization: `Bearer ${token.value}`
-  }
+  headers: { Authorization: `Bearer ${token.value}` }
 });
 
 const { data: user } = await useFetch<any>(`${config.public.apiBase}/api/user`, {
-  headers: {
-    Authorization: `Bearer ${token.value}`
-  }
+  headers: { Authorization: `Bearer ${token.value}` }
 });
 
 const { data: categories } = await useFetch<any>(`${config.public.apiBase}/api/categories`);
-
 const { data: regions } = await useFetch<any>(`${config.public.apiBase}/api/regions`);
+
+// ─── Geography (CREATE EVENT) ────────────────────────────────────────────────
 const citiesList = ref<any[]>([]);
 const selectedRegionId = ref<number | null>(null);
 const isLoadingCities = ref(false);
@@ -329,72 +417,19 @@ const handleRegionChange = async () => {
   newEvent.value.city_id = null;
   citiesList.value = [];
   if (!selectedRegionId.value) return;
-
   isLoadingCities.value = true;
   try {
     const res: any = await $fetch(`${config.public.apiBase}/api/cities?region_id=${selectedRegionId.value}`);
     citiesList.value = res;
-  } catch (e) {
-    console.error('Error cargando ciudades', e);
-  } finally {
-    isLoadingCities.value = false;
-  }
-}
-
-const newEvent = ref({
-  name: '',
-  date: '',
-  category_id: null,
-  city_id: null as number | null,
-  address: '',
-  is_location_public: true,
-  creator_budget: '',
-  requests_internal_service: false
-});
-const isCreatingEvent = ref(false);
-
-const isWishModalOpen = ref(false);
-const isEditingWish = ref(false);
-const editingWishId = ref<number | null>(null);
-const selectedEventId = ref<number | null>(null);
-const isCreatingWish = ref(false);
-const newWish = ref({
-  name: '',
-  description: '',
-  liquid_amount: '',
-  target_amount: 0,
-  is_open: false
-});
-
-const isNotesModalOpen = ref(false);
-const selectedEventNotes = ref<any>(null);
-
-const openAdminNotes = (evt: any) => {
-  selectedEventNotes.value = evt;
-  isNotesModalOpen.value = true;
+  } catch (e) { console.error(e); } finally { isLoadingCities.value = false; }
 };
 
-const calculation = ref<any>(null);
-
-const updateCalculations = async () => {
-  if (!newWish.value.liquid_amount || parseInt(newWish.value.liquid_amount) <= 0) {
-    calculation.value = null;
-    newWish.value.target_amount = 0;
-    return;
-  }
-
-  try {
-    const res: any = await $fetch(`${config.public.apiBase}/api/checkout/calculate?amount=${newWish.value.liquid_amount}&gateway=flow&type=liquid`);
-    calculation.value = res;
-    newWish.value.target_amount = res.gross;
-  } catch (e) {
-    console.error('Error calculando comisiones', e);
-  }
-}
+// ─── CREATE EVENT ─────────────────────────────────────────────────────────────
+const newEvent = ref({ name: '', date: '', category_id: null, city_id: null as number | null, address: '', is_location_public: true, creator_budget: '', requests_internal_service: false });
+const isCreatingEvent = ref(false);
 
 const createEvent = async () => {
   if (!newEvent.value.name || !newEvent.value.date) return;
-  
   isCreatingEvent.value = true;
   try {
     await $fetch(`${config.public.apiBase}/api/events`, {
@@ -409,33 +444,131 @@ const createEvent = async () => {
   } catch (err) {
     console.error(err);
     alert('Error al crear el evento');
-  } finally {
-    isCreatingEvent.value = false;
+  } finally { isCreatingEvent.value = false; }
+};
+
+// ─── EDIT EVENT ───────────────────────────────────────────────────────────────
+const isEditEventModalOpen = ref(false);
+const editingEvent = ref<any>(null);
+const isSavingEvent = ref(false);
+const editRegionId = ref<number | null>(null);
+const editCitiesList = ref<any[]>([]);
+const isLoadingEditCities = ref(false);
+const editEventForm = ref({ name: '', date: '', category_id: null as number | null, city_id: null as number | null, address: '', is_location_public: true, creator_budget: '' });
+
+const openEditModal = async (evt: any) => {
+  editingEvent.value = evt;
+  editEventForm.value = {
+    name: evt.name,
+    date: evt.date,
+    category_id: evt.category_id,
+    city_id: evt.city_id,
+    address: evt.address || '',
+    is_location_public: evt.is_location_public,
+    creator_budget: evt.creator_budget || ''
+  };
+  // Pre-load region from city
+  editRegionId.value = evt.city?.region_id ?? null;
+  if (editRegionId.value) {
+    isLoadingEditCities.value = true;
+    try {
+      const res: any = await $fetch(`${config.public.apiBase}/api/cities?region_id=${editRegionId.value}`);
+      editCitiesList.value = res;
+    } catch (e) { console.error(e); } finally { isLoadingEditCities.value = false; }
   }
-}
+  isEditEventModalOpen.value = true;
+};
+
+const handleEditRegionChange = async () => {
+  editEventForm.value.city_id = null;
+  editCitiesList.value = [];
+  if (!editRegionId.value) return;
+  isLoadingEditCities.value = true;
+  try {
+    const res: any = await $fetch(`${config.public.apiBase}/api/cities?region_id=${editRegionId.value}`);
+    editCitiesList.value = res;
+  } catch (e) { console.error(e); } finally { isLoadingEditCities.value = false; }
+};
+
+const closeEditModal = () => {
+  isEditEventModalOpen.value = false;
+  editingEvent.value = null;
+};
+
+const saveEditedEvent = async () => {
+  if (!editingEvent.value) return;
+  isSavingEvent.value = true;
+  try {
+    await $fetch(`${config.public.apiBase}/api/events/${editingEvent.value.id}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token.value}` },
+      body: editEventForm.value
+    });
+    closeEditModal();
+    await refresh();
+  } catch (err: any) {
+    console.error(err);
+    alert(err.response?._data?.message || 'Error al guardar el evento');
+  } finally { isSavingEvent.value = false; }
+};
+
+// ─── WISH MODAL ───────────────────────────────────────────────────────────────
+const isWishModalOpen = ref(false);
+const isEditingWish = ref(false);
+const editingWishId = ref<number | null>(null);
+const selectedEventId = ref<number | null>(null);
+const isCreatingWish = ref(false);
+const wishAmountError = ref('');
+const newWish = ref({ name: '', description: '', liquid_amount: '', target_amount: 0, is_open: false });
+
+const isNotesModalOpen = ref(false);
+const selectedEventNotes = ref<any>(null);
+
+const openAdminNotes = (evt: any) => { selectedEventNotes.value = evt; isNotesModalOpen.value = true; };
+
+const calculation = ref<any>(null);
+
+const selectQuickAmount = (val: number) => {
+  newWish.value.liquid_amount = String(val);
+  wishAmountError.value = '';
+  updateCalculations();
+};
+
+const updateCalculations = async () => {
+  const amount = parseInt(newWish.value.liquid_amount);
+  if (!newWish.value.liquid_amount || amount <= 0) {
+    calculation.value = null;
+    newWish.value.target_amount = 0;
+    wishAmountError.value = '';
+    return;
+  }
+  if (amount < 5000) {
+    wishAmountError.value = 'El valor mínimo por regalo debe ser de $5.000';
+    calculation.value = null;
+    return;
+  }
+  wishAmountError.value = '';
+  try {
+    const res: any = await $fetch(`${config.public.apiBase}/api/checkout/calculate?amount=${amount}&gateway=flow&type=liquid`);
+    calculation.value = res;
+    newWish.value.target_amount = res.gross;
+  } catch (e) { console.error(e); }
+};
 
 const openWishModal = (eventId: number, wish: any = null) => {
   selectedEventId.value = eventId;
   if (wish) {
     isEditingWish.value = true;
     editingWishId.value = wish.id;
-    newWish.value = {
-      name: wish.name,
-      description: wish.description,
-      liquid_amount: wish.liquid_amount.toString(),
-      target_amount: wish.target_amount,
-      is_open: wish.liquid_amount === 0
-    };
-    if (wish.liquid_amount > 0) {
-      updateCalculations();
-    }
+    newWish.value = { name: wish.name, description: wish.description, liquid_amount: wish.liquid_amount.toString(), target_amount: wish.target_amount, is_open: wish.liquid_amount === 0 };
+    if (wish.liquid_amount > 0) updateCalculations();
   } else {
     isEditingWish.value = false;
     editingWishId.value = null;
     newWish.value = { name: '', description: '', liquid_amount: '', target_amount: 0, is_open: false };
   }
   isWishModalOpen.value = true;
-}
+};
 
 const closeWishModal = () => {
   isWishModalOpen.value = false;
@@ -444,17 +577,23 @@ const closeWishModal = () => {
   editingWishId.value = null;
   newWish.value = { name: '', description: '', liquid_amount: '', target_amount: 0, is_open: false };
   calculation.value = null;
-}
+  wishAmountError.value = '';
+};
 
 const submitWish = async () => {
   if (!selectedEventId.value || !newWish.value.name) return;
-  isCreatingWish.value = true;
+  
+  const amount = parseInt(newWish.value.liquid_amount);
+  if (!newWish.value.is_open && amount < 5000) {
+    wishAmountError.value = 'El valor mínimo por regalo debe ser de $5.000';
+    return;
+  }
 
+  isCreatingWish.value = true;
   try {
     const url = isEditingWish.value 
       ? `${config.public.apiBase}/api/wishes/${editingWishId.value}`
       : `${config.public.apiBase}/api/wishes`;
-    
     await $fetch(url, {
       method: isEditingWish.value ? 'PUT' : 'POST',
       headers: { Authorization: `Bearer ${token.value}` },
@@ -468,35 +607,24 @@ const submitWish = async () => {
     });
     closeWishModal();
     await refresh();
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
-    alert('Error al guardar el deseo');
-  } finally {
-    isCreatingWish.value = false;
-  }
-}
+    const msg = e.response?._data?.message || 'Error al guardar el deseo';
+    alert(msg);
+  } finally { isCreatingWish.value = false; }
+};
 
 const deleteEvent = async (evt: any) => {
   if (!confirm(`¿Estás seguro de que deseas eliminar el evento "${evt.name}"? Esta acción no se puede deshacer.`)) return;
-  
   try {
-    await $fetch(`${config.public.apiBase}/api/events/${evt.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token.value}` }
-    });
+    await $fetch(`${config.public.apiBase}/api/events/${evt.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token.value}` } });
     await refresh();
   } catch (err: any) {
     console.error(err);
     alert(err.response?._data?.message || 'Error al eliminar el evento');
   }
-}
+};
 
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('es-CL').format(num);
-}
-
-const logout = () => {
-  token.value = null; // Remove cookie
-  router.push('/login');
-}
+const formatNumber = (num: number) => new Intl.NumberFormat('es-CL').format(num);
+const logout = () => { token.value = null; router.push('/login'); };
 </script>

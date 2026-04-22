@@ -27,6 +27,29 @@
               <option value="manual_service">Abonos a Servicio</option>
             </select>
           </div>
+          <div class="flex flex-col gap-1 min-w-[150px]">
+            <label class="text-[10px] font-bold text-zinc-400 uppercase">Categoría</label>
+            <select v-model="paymentFilters.category_id" class="px-3 py-2 border border-zinc-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+              <option :value="null">Todas</option>
+              <option value="uncategorized">Sin Categoría</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 min-w-[150px]">
+            <label class="text-[10px] font-bold text-zinc-400 uppercase">Ciudad</label>
+            <select v-model="paymentFilters.city_id" class="px-3 py-2 border border-zinc-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+              <option :value="null">Todas</option>
+              <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.name }}</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 min-w-[120px]">
+            <label class="text-[10px] font-bold text-zinc-400 uppercase">Servicio</label>
+            <select v-model="paymentFilters.requested_service" class="px-3 py-2 border border-zinc-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+              <option value="all">Todo</option>
+              <option value="yes">Con Servicio</option>
+              <option value="no">Sin Servicio</option>
+            </select>
+          </div>
           <div class="flex items-end h-full gap-2 pt-5">
             <UiButton @click="setQuickPeriod(7)" variant="ghost" size="sm" class="text-xs">7D</UiButton>
             <UiButton @click="setQuickPeriod('month')" variant="ghost" size="sm" class="text-xs">Mes</UiButton>
@@ -177,8 +200,14 @@ const paymentFilters = ref({
   start_date: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
   end_date: new Date().toISOString().split('T')[0],
   user_id: null as number | null,
-  payment_type: 'all'
+  payment_type: 'all',
+  category_id: null as string | number | null,
+  city_id: null as number | null,
+  requested_service: 'all'
 });
+
+const { data: categories } = await useFetch<any>(`${config.public.apiBase}/api/categories`);
+const { data: cities } = await useFetch<any>(`${config.public.apiBase}/api/cities`);
 
 const { data: creators } = await useFetch<any>(`${config.public.apiBase}/api/admin/users`, {
   headers: { Authorization: `Bearer ${token.value}` },

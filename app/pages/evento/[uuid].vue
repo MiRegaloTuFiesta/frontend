@@ -65,7 +65,7 @@
               </div>
               <div v-if="event.total_price > 0" class="text-right">
                 <span class="text-sm font-medium text-stone-500 uppercase tracking-wider">Meta</span>
-                <p class="text-xl font-bold text-stone-400 mt-1">${{ formatNumber(event.total_price - (event.manual_payments_sum_amount || 0)) }}</p>
+                <p class="text-xl font-bold text-stone-400 mt-1">${{ formatNumber(event.total_price) }}</p>
               </div>
             </div>
             <!-- Interactive Progress Bar -->
@@ -122,6 +122,11 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Footer: Report Event -->
+      <div class="text-center pt-4 pb-2">
+        <button @click="isReportModalOpen = true" class="text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2 transition-colors">⚐ Reportar este evento</button>
       </div>
     </div>
 
@@ -266,6 +271,39 @@
         </UiButton>
       </div>
     </div>
+
+    <!-- Modal Reportar Evento -->
+    <div v-if="isReportModalOpen" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-base font-bold text-stone-900">⚐ Reportar Evento</h3>
+          <button @click="closeReportModal" class="text-stone-400 hover:text-stone-600 text-xl">&times;</button>
+        </div>
+        <div v-if="reportSuccess" class="text-center py-6">
+          <p class="text-4xl mb-3">✅</p>
+          <p class="font-bold text-stone-800">Reporte enviado</p>
+          <p class="text-sm text-stone-500 mt-1">Gracias por tu reporte. Nuestro equipo lo revisará pronto.</p>
+          <UiButton @click="closeReportModal" class="mt-4 bg-stone-900 text-white w-full">Cerrar</UiButton>
+        </div>
+        <form v-else @submit.prevent="submitReport" class="space-y-4">
+          <div class="space-y-2">
+            <UiLabel for="reportEmail">Tu correo electrónico</UiLabel>
+            <UiInput id="reportEmail" type="email" v-model="reportForm.email" placeholder="tu@correo.com" required />
+          </div>
+          <div class="space-y-2">
+            <UiLabel for="reportReason">Motivo del reporte</UiLabel>
+            <textarea id="reportReason" v-model="reportForm.reason" rows="3" required placeholder="Describe el motivo..." class="w-full px-3 py-2 rounded-md border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-stone-300 resize-none"></textarea>
+          </div>
+          <p v-if="reportError" class="text-xs text-red-600 font-medium">{{ reportError }}</p>
+          <div class="flex gap-3 pt-2">
+            <UiButton type="button" variant="outline" @click="closeReportModal" class="flex-1">Cancelar</UiButton>
+            <UiButton type="submit" class="flex-1 bg-stone-900 text-white" :disabled="isSubmittingReport">
+              {{ isSubmittingReport ? 'Enviando...' : 'Enviar Reporte' }}
+            </UiButton>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -314,6 +352,36 @@ const formatNumber = (num: number) => {
 }
 
 // Checkout logic
+// ─── REPORT EVENT ─────────────────────────────────────────────────────────────
+const isReportModalOpen = ref(false);
+const reportSuccess = ref(false);
+const isSubmittingReport = ref(false);
+const reportError = ref('');
+const reportForm = ref({ email: '', reason: '' });
+
+const closeReportModal = () => {
+  isReportModalOpen.value = false;
+  reportSuccess.value = false;
+  reportError.value = '';
+  reportForm.value = { email: '', reason: '' };
+};
+
+const submitReport = async () => {
+  reportError.value = '';
+  isSubmittingReport.value = true;
+  try {
+    await $fetch(`${config.public.apiBase}/api/events/${event.value?.uuid}/report`, {
+      method: 'POST',
+      body: { reporter_email: reportForm.value.email, reason: reportForm.value.reason }
+    });
+    reportSuccess.value = true;
+  } catch (e: any) {
+    reportError.value = e.response?._data?.message || 'Error al enviar el reporte. Intenta nuevamente.';
+  } finally {
+    isSubmittingReport.value = false;
+  }
+};
+
 const isCheckoutModalOpen = ref(false);
 const selectedWish = ref<any>(null);
 const isProcessingCheckout = ref(false);
@@ -462,6 +530,7 @@ onMounted(async () => {
     }
   }
 });
+
 </script>
 
 <style scoped>

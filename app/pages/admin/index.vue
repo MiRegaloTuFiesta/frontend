@@ -20,7 +20,7 @@
             <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Eventos Totales</span>
           </div>
           <div class="text-3xl font-extrabold text-zinc-900">{{ stats?.summary.total_events }}</div>
-          <div class="mt-2 text-xs text-amber-600 font-bold">{{ stats?.summary.pending_events }} pendientes de aprobación</div>
+          <div class="mt-2 text-xs text-zinc-500">Creados en la plataforma</div>
         </UiCardContent>
       </UiCard>
 
@@ -107,6 +107,40 @@
               </div>
             </div>
          </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity: Users & Events -->
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Recent Users -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+        <h3 class="text-base font-bold text-zinc-900 mb-4 flex items-center gap-2">🆕 Nuevos Usuarios</h3>
+        <div class="space-y-3">
+          <div v-for="u in stats?.recent_users" :key="u.id" class="flex gap-3 items-center p-2 hover:bg-zinc-50 rounded-xl">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">{{ u.name?.[0] }}</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-zinc-900 truncate">{{ u.name }}</p>
+              <p class="text-xs text-zinc-400 truncate">{{ u.email }}</p>
+            </div>
+            <span class="text-[10px] text-zinc-400 shrink-0">{{ new Date(u.created_at).toLocaleDateString('es-CL') }}</span>
+          </div>
+          <p v-if="!stats?.recent_users?.length" class="text-sm text-zinc-400 py-2 text-center">Sin usuarios recientes</p>
+        </div>
+      </div>
+      <!-- Recent Events -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+        <h3 class="text-base font-bold text-zinc-900 mb-4 flex items-center gap-2">📋 Nuevos Eventos</h3>
+        <div class="space-y-3">
+          <div v-for="ev in stats?.recent_events" :key="ev.id" class="flex gap-3 items-center p-2 hover:bg-zinc-50 rounded-xl">
+            <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-sm font-bold text-primary-600">🎉</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-zinc-900 truncate">{{ ev.name }}</p>
+              <p class="text-xs text-zinc-400 truncate">por {{ ev.user?.name }}</p>
+            </div>
+            <span class="text-[10px] text-zinc-400 shrink-0">{{ new Date(ev.created_at).toLocaleDateString('es-CL') }}</span>
+          </div>
+          <p v-if="!stats?.recent_events?.length" class="text-sm text-zinc-400 py-2 text-center">Sin eventos recientes</p>
+        </div>
       </div>
     </div>
   </div>

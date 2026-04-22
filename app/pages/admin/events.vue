@@ -1,12 +1,42 @@
 <template>
   <div class="animate-in slide-in-from-right duration-500 space-y-6">
     <!-- Buscador -->
-    <div class="bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm flex items-center gap-4">
-      <div class="relative flex-1 max-w-md">
+    <div class="bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm flex flex-wrap items-center gap-4">
+      <div class="relative flex-1 min-w-[300px]">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-lg">🔍</span>
         <UiInput v-model="searchQuery" placeholder="Buscar por nombre, UUID o creador..." class="pl-10 h-11" />
       </div>
-      <div v-if="pending" class="text-zinc-400 animate-spin text-xl">🔄</div>
+      
+      <!-- Filtro Categoría -->
+      <div class="flex flex-col gap-1 min-w-[150px]">
+        <label class="text-[10px] font-bold text-zinc-400 uppercase">Categoría</label>
+        <select v-model="filterCategory" class="px-3 py-2 border border-zinc-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+          <option value="">Todas</option>
+          <option value="uncategorized">Sin Categoría</option>
+          <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+        </select>
+      </div>
+
+      <!-- Filtro Ciudad -->
+      <div class="flex flex-col gap-1 min-w-[150px]">
+        <label class="text-[10px] font-bold text-zinc-400 uppercase">Ciudad</label>
+        <select v-model="filterCity" class="px-3 py-2 border border-zinc-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+          <option value="">Todas</option>
+          <option v-for="city in cities" :key="city.id" :value="city.id">{{ city.name }}</option>
+        </select>
+      </div>
+
+      <!-- Filtro Servicio -->
+      <div class="flex flex-col gap-1 min-w-[150px]">
+        <label class="text-[10px] font-bold text-zinc-400 uppercase">Servicio</label>
+        <select v-model="filterService" class="px-3 py-2 border border-zinc-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+          <option value="all">Todo</option>
+          <option value="yes">Con Servicio</option>
+          <option value="no">Sin Servicio</option>
+        </select>
+      </div>
+
+      <div v-if="pending" class="text-zinc-400 animate-spin text-xl self-end mb-2">🔄</div>
     </div>
 
     <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
@@ -313,11 +343,23 @@ const config = useRuntimeConfig();
 const searchQuery = ref('');
 const debouncedSearch = refDebounced(searchQuery, 400);
 
+const filterCategory = ref('');
+const filterCity = ref('');
+const filterService = ref('all');
+
 const { data: events, refresh: refreshEvents, pending } = await useFetch<any>(`${config.public.apiBase}/api/events`, {
   headers: { Authorization: `Bearer ${token.value}` },
-  query: { search: debouncedSearch },
-  watch: [debouncedSearch]
+  query: { 
+    search: debouncedSearch,
+    category_id: filterCategory,
+    city_id: filterCity,
+    requested_service: filterService
+  },
+  watch: [debouncedSearch, filterCategory, filterCity, filterService]
 });
+
+const { data: categories } = await useFetch<any>(`${config.public.apiBase}/api/categories`);
+const { data: cities } = await useFetch<any>(`${config.public.apiBase}/api/cities`);
 
 const { data: adminsList } = await useFetch<any>(`${config.public.apiBase}/api/admin/users`, {
   headers: { Authorization: `Bearer ${token.value}` },
