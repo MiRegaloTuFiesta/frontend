@@ -10,7 +10,7 @@
         
         <!-- Mobile Create Event Button -->
         <UiButton @click="showCreateEventModal = true" size="sm" class="md:hidden bg-primary text-white font-black text-[10px] uppercase tracking-widest px-4 h-10 shadow-lg shadow-primary-200">
-            + Crear Evento
+            + Nuevo Evento
         </UiButton>
         <nav class="flex items-center gap-2 sm:gap-4">
           <UiButton v-if="user?.role === 'admin'" as="a" href="/admin" variant="secondary" size="sm" class="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold hidden sm:flex">Admin Panel</UiButton>
