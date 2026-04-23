@@ -82,6 +82,7 @@ const tabs = [
   { id: 'users', name: 'Usuarios', icon: '👥', path: '/admin/users' },
   { id: 'payments', name: 'Pagos Recibidos', icon: '💸', path: '/admin/payments' },
   { id: 'categories', name: 'Categorías', icon: '🏷️', path: '/admin/categories' },
+  { id: 'banks', name: 'Bancos y Cuentas', icon: '🏦', path: '/admin/banks' },
   { id: 'reports', name: 'Reportes', icon: '⚐', path: '/admin/reports' },
   { id: 'wish-templates', name: 'Plantillas de Deseos', icon: '📋', path: '/admin/wish-templates' },
   { id: 'settings', name: 'Configuración', icon: '⚙️', path: '/admin/settings' },

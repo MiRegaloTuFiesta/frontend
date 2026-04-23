@@ -1,0 +1,220 @@
+<template>
+  <div class="min-h-screen bg-stone-50 flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200">
+      <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <NuxtLink to="/dashboard" class="text-primary-800 font-bold hover:text-primary-600 transition-colors flex items-center gap-2">
+            <span class="text-lg">←</span>
+            <span>Volver al Panel</span>
+          </NuxtLink>
+        </div>
+        <h1 class="text-lg font-bold text-stone-800 absolute left-1/2 -translate-x-1/2 hidden md:block">Mi Perfil</h1>
+        <nav class="flex items-center gap-4">
+          <span class="text-sm font-medium text-stone-500 hidden sm:block">{{ user?.name }}</span>
+          <UiButton @click="logout" variant="ghost" size="sm" class="text-stone-400">Cerrar Sesión</UiButton>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Sidebar Navigation (Profile specific) -->
+        <div class="md:col-span-1 space-y-2">
+          <button @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
+            <span>👤</span> Datos Generales
+          </button>
+          <button @click="activeTab = 'bank'" :class="activeTab === 'bank' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
+            <span>🏦</span> Datos Bancarios
+          </button>
+          <button @click="activeTab = 'password'" :class="activeTab === 'password' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
+            <span>🔒</span> Seguridad
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="md:col-span-2">
+          <!-- General Info Tab -->
+          <UiCard v-if="activeTab === 'general'" class="border-stone-200 shadow-sm animate-in fade-in duration-300">
+            <UiCardHeader>
+              <UiCardTitle>Datos de la Cuenta</UiCardTitle>
+              <UiCardDescription>Actualiza tu información personal</UiCardDescription>
+            </UiCardHeader>
+            <UiCardContent class="space-y-6">
+              <div class="space-y-2">
+                <UiLabel for="name">Nombre Completo</UiLabel>
+                <UiInput id="name" v-model="profileForm.name" />
+              </div>
+              <div class="space-y-2">
+                <UiLabel for="email">Email</UiLabel>
+                <UiInput id="email" v-model="profileForm.email" type="email" />
+                <p class="text-[10px] text-amber-600 font-bold">⚠️ Si cambias tu correo, deberás verificarlo nuevamente para operar.</p>
+              </div>
+              <div class="space-y-2">
+                <UiLabel for="phone">Teléfono de contacto</UiLabel>
+                <UiInput id="phone" v-model="profileForm.phone" placeholder="+56 9 ..." />
+              </div>
+              <div class="pt-4">
+                <UiButton @click="updateProfile" class="w-full bg-primary text-white" :disabled="isSaving">
+                  {{ isSaving ? 'Guardando...' : 'Guardar Datos Generales' }}
+                </UiButton>
+              </div>
+            </UiCardContent>
+          </UiCard>
+
+          <!-- Bank Details Tab -->
+          <UiCard v-if="activeTab === 'bank'" class="border-stone-200 shadow-sm animate-in fade-in duration-300">
+            <UiCardHeader>
+              <UiCardTitle>Datos para Transferencias</UiCardTitle>
+              <UiCardDescription>¿A dónde quieres recibir tus regalos recaudados?</UiCardDescription>
+            </UiCardHeader>
+            <UiCardContent class="space-y-6">
+              <div class="space-y-2">
+                <UiLabel>Seleccionar Banco</UiLabel>
+                <select v-model="profileForm.bank_id" @change="profileForm.account_type_id = null" class="w-full h-11 px-3 rounded-lg border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none">
+                  <option :value="null">Seleccionar Banco...</option>
+                  <option v-for="b in banks" :key="b.id" :value="b.id">{{ b.name }}</option>
+                </select>
+              </div>
+              
+              <div class="space-y-2">
+                <UiLabel>Tipo de Cuenta</UiLabel>
+                <select v-model="profileForm.account_type_id" class="w-full h-11 px-3 rounded-lg border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none" :disabled="!selectedBank">
+                  <option :value="null">{{ !selectedBank ? 'Primero selecciona un banco' : 'Seleccionar tipo...' }}</option>
+                  <option v-for="t in selectedBank?.account_types" :key="t.id" :value="t.id">{{ t.name }}</option>
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <UiLabel>Número de Cuenta</UiLabel>
+                <UiInput v-model="profileForm.account_number" placeholder="Ej: 12345678" :disabled="!profileForm.account_type_id" />
+                <p v-if="profileForm.bank_id && !profileForm.account_number" class="text-[10px] text-amber-600 font-bold">⚠️ Si ingresas datos bancarios, el número de cuenta es obligatorio.</p>
+              </div>
+
+              <div class="pt-4">
+                <UiButton @click="updateProfile" class="w-full bg-primary text-white" :disabled="isSaving || (profileForm.bank_id && !profileForm.account_number)">
+                  {{ isSaving ? 'Guardando...' : 'Actualizar Datos Bancarios' }}
+                </UiButton>
+              </div>
+            </UiCardContent>
+          </UiCard>
+
+          <!-- Password Tab -->
+          <UiCard v-if="activeTab === 'password'" class="border-stone-200 shadow-sm animate-in fade-in duration-300">
+            <UiCardHeader>
+              <UiCardTitle>Cambiar Contraseña</UiCardTitle>
+              <UiCardDescription>Recomendamos usar una contraseña segura y única</UiCardDescription>
+            </UiCardHeader>
+            <UiCardContent class="space-y-6">
+              <div class="space-y-2">
+                <UiLabel for="currentPassword">Contraseña Actual</UiLabel>
+                <UiInput id="currentPassword" type="password" v-model="passwordForm.current_password" />
+              </div>
+              <hr class="border-stone-100" />
+              <div class="space-y-2">
+                <UiLabel for="newPassword">Nueva Contraseña</UiLabel>
+                <UiInput id="newPassword" type="password" v-model="passwordForm.password" />
+              </div>
+              <div class="space-y-2">
+                <UiLabel for="confirmPassword">Confirmar Nueva Contraseña</UiLabel>
+                <UiInput id="confirmPassword" type="password" v-model="passwordForm.password_confirmation" />
+              </div>
+              <div class="pt-4">
+                <UiButton @click="changePassword" class="w-full bg-zinc-900 text-white" :disabled="isSaving">
+                  {{ isSaving ? 'Cambiando...' : 'Actualizar Contraseña' }}
+                </UiButton>
+              </div>
+            </UiCardContent>
+          </UiCard>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useCookie, useRouter, useFetch, useRuntimeConfig } from '#imports';
+
+const router = useRouter();
+const config = useRuntimeConfig();
+const token = useCookie('auth_token');
+
+if (!token.value) {
+    router.push('/login');
+}
+
+const activeTab = ref('general');
+const isSaving = ref(false);
+
+const { data: user, refresh: refreshUser } = await useFetch<any>(`${config.public.apiBase}/api/user`, {
+  headers: { Authorization: `Bearer ${token.value}` }
+});
+
+const { data: banks } = await useFetch<any>(`${config.public.apiBase}/api/banks`);
+
+const profileForm = ref({
+    name: user.value?.name || '',
+    email: user.value?.email || '',
+    phone: user.value?.phone || '',
+    bank_id: user.value?.bank_id || null,
+    account_type_id: user.value?.account_type_id || null,
+    account_number: user.value?.account_number || '',
+});
+
+const passwordForm = ref({
+    current_password: '',
+    password: '',
+    password_confirmation: ''
+});
+
+const selectedBank = computed(() => {
+    if (!banks.value || !profileForm.value.bank_id) return null;
+    return banks.value.find((b: any) => b.id === profileForm.value.bank_id);
+});
+
+const updateProfile = async () => {
+    isSaving.value = true;
+    try {
+        await $fetch(`${config.public.apiBase}/api/user/profile`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token.value}` },
+            body: profileForm.value
+        });
+        alert('¡Perfil actualizado con éxito!');
+        await refreshUser();
+    } catch (err: any) {
+        console.error(err);
+        alert(err.response?._data?.message || 'Error al actualizar perfil');
+    } finally {
+        isSaving.value = false;
+    }
+};
+
+const changePassword = async () => {
+    if (passwordForm.value.password !== passwordForm.value.password_confirmation) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+    isSaving.value = true;
+    try {
+        await $fetch(`${config.public.apiBase}/api/user/password`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token.value}` },
+            body: passwordForm.value
+        });
+        alert('Contraseña actualizada correctamente');
+        passwordForm.value = { current_password: '', password: '', password_confirmation: '' };
+    } catch (err: any) {
+        console.error(err);
+        alert(err.response?._data?.message || 'Error al cambiar contraseña');
+    } finally {
+        isSaving.value = false;
+    }
+};
+
+const logout = () => {
+    token.value = null;
+    router.push('/login');
+};
+</script>

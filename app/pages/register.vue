@@ -31,6 +31,34 @@
               <UiLabel for="phone">Teléfono Celular (Opcional)</UiLabel>
               <UiInput id="phone" type="tel" v-model="form.phone" placeholder="+56 9 1234 5678" />
             </div>
+
+            <!-- Datos Bancarios Opcionales -->
+            <div class="pt-4 border-t border-stone-100 space-y-4">
+              <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Datos Bancarios (Opcional)</p>
+              
+              <div class="space-y-2">
+                <UiLabel>Banco</UiLabel>
+                <select v-model="form.bank_id" @change="form.account_type_id = null; form.account_number = ''" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none transition-all">
+                  <option :value="null">Seleccionar banco (Opcional)...</option>
+                  <option v-for="b in banks" :key="b.id" :value="b.id">{{ b.name }}</option>
+                </select>
+              </div>
+
+              <div v-if="form.bank_id" class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div class="space-y-2">
+                  <UiLabel>Tipo de Cuenta</UiLabel>
+                  <select v-model="form.account_type_id" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none" required>
+                    <option :value="null">Seleccionar tipo...</option>
+                    <option v-for="t in selectedBank?.account_types" :key="t.id" :value="t.id">{{ t.name }}</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <UiLabel>Número de Cuenta</UiLabel>
+                  <UiInput v-model="form.account_number" placeholder="Ej: 12345678" required />
+                </div>
+              </div>
+            </div>
             
             <div v-if="errorMessage" class="p-3 bg-red-50 text-red-700 text-sm rounded-lg">
               {{ errorMessage }}
@@ -53,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from '#imports';
 
 const router = useRouter();
@@ -68,13 +96,24 @@ const form = ref({
   name: '',
   email: '',
   password: '',
-  phone: ''
+  phone: '',
+  bank_id: null as number | null,
+  account_type_id: null as number | null,
+  account_number: ''
 });
 
 const isLoading = ref(false);
 const errorMessage = ref('');
 
 const config = useRuntimeConfig();
+
+// Fetch banks for select
+const { data: banks } = await useFetch<any>(`${config.public.apiBase}/api/banks`);
+
+const selectedBank = computed(() => {
+  if (!banks.value || !form.value.bank_id) return null;
+  return banks.value.find((b: any) => b.id === form.value.bank_id);
+});
 
 const register = async () => {
   isLoading.value = true;

@@ -9,8 +9,12 @@
         <h1 class="text-xl font-bold text-primary-800">Panel de Creador</h1>
         <nav class="flex items-center gap-4">
           <UiButton v-if="user?.role === 'admin'" as="a" href="/admin" variant="secondary" size="sm" class="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold">Admin Panel</UiButton>
-          <span class="text-sm font-medium text-stone-500">Bienvenido, {{ user?.name || 'Gestor' }}</span>
-          <UiButton @click="logout" variant="outline" size="sm">Cerrar Sesión</UiButton>
+          <NuxtLink to="/dashboard/profile" class="text-sm font-bold text-stone-700 hover:text-primary transition-colors flex items-center gap-1.5 group">
+            <span class="text-stone-400 group-hover:text-primary transition-colors">👤</span>
+            {{ user?.name || 'Mi Cuenta' }}
+          </NuxtLink>
+          <div class="w-px h-6 bg-stone-200 hidden sm:block mx-1"></div>
+          <UiButton v-if="user" @click="logout" variant="ghost" size="sm" class="text-stone-400">Cerrar Sesión</UiButton>
         </nav>
       </div>
     </header>
@@ -86,6 +90,18 @@
                 {{ isCreatingEvent ? 'Guardando...' : 'Crear Evento' }}
               </UiButton>
             </form>
+          </UiCardContent>
+        </UiCard>
+
+        <!-- Profile Card -->
+        <UiCard class="border-stone-200 shadow-sm">
+          <UiCardHeader class="pb-3">
+            <UiCardTitle class="text-sm">Gestión de Cuenta</UiCardTitle>
+          </UiCardHeader>
+          <UiCardContent>
+            <NuxtLink to="/dashboard/profile" class="flex items-center gap-3 p-3 bg-stone-50 rounded-xl hover:bg-primary-50 hover:text-primary-800 transition-all font-bold text-sm text-stone-600">
+               <span>👤</span> Mi Perfil
+            </NuxtLink>
           </UiCardContent>
         </UiCard>
       </div>
