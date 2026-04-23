@@ -5,24 +5,34 @@
       <div v-if="route.query.verified === '1' || route.query['amp;verified'] === '1'" class="bg-primary-600 text-white text-center py-2 text-sm font-bold">
         ¡Tu cuenta ha sido verificada con éxito! Bienvenido a Mi Regalo, Tu Fiesta.
       </div>
-      <div class="container mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 class="text-xl font-bold text-primary-800">Panel de Creador</h1>
-        <nav class="flex items-center gap-4">
-          <UiButton v-if="user?.role === 'admin'" as="a" href="/admin" variant="secondary" size="sm" class="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold">Admin Panel</UiButton>
-          <NuxtLink to="/dashboard/profile" class="text-sm font-bold text-stone-700 hover:text-primary transition-colors flex items-center gap-1.5 group">
+      <div class="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <h1 class="text-xl font-bold text-primary-800 shrink-0">Panel de Creador</h1>
+        
+        <!-- Mobile Create Event Button -->
+        <UiButton @click="showCreateEventModal = true" size="sm" class="md:hidden bg-primary text-white font-black text-[10px] uppercase tracking-widest px-4 h-10 shadow-lg shadow-primary-200">
+            + Crear Evento
+        </UiButton>
+        <nav class="flex items-center gap-2 sm:gap-4">
+          <UiButton v-if="user?.role === 'admin'" as="a" href="/admin" variant="secondary" size="sm" class="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold hidden sm:flex">Admin Panel</UiButton>
+          <NuxtLink to="/dashboard/profile" class="text-sm font-bold text-stone-700 hover:text-primary transition-colors hidden sm:flex items-center gap-1.5 group">
             <span class="text-stone-400 group-hover:text-primary transition-colors">👤</span>
             {{ user?.name || 'Mi Cuenta' }}
           </NuxtLink>
           <div class="w-px h-6 bg-stone-200 hidden sm:block mx-1"></div>
-          <UiButton v-if="user" @click="logout" variant="ghost" size="sm" class="text-stone-400">Cerrar Sesión</UiButton>
+          <UiButton v-if="user" @click="logout" variant="ghost" size="sm" class="text-stone-400 hidden sm:flex">Cerrar Sesión</UiButton>
+          
+          <UiButton @click="showMobileMenu = true" variant="outline" size="sm" class="md:hidden border-stone-200 text-stone-600 font-bold gap-2">
+            <span>☰</span>
+            <span class="text-[10px] uppercase tracking-wider">Menú</span>
+          </UiButton>
         </nav>
       </div>
     </header>
 
     <main class="container mx-auto px-4 py-8 flex-1 grid md:grid-cols-12 gap-8">
       
-      <!-- Sidebar / Config -->
-      <div class="md:col-span-4 lg:col-span-3 space-y-6">
+      <!-- Sidebar / Config (Desktop only) -->
+      <div class="hidden md:block md:col-span-4 lg:col-span-3 space-y-6">
         <UiCard class="border-stone-200 shadow-sm">
           <UiCardHeader>
             <UiCardTitle>Nuevo Evento</UiCardTitle>
@@ -90,18 +100,6 @@
                 {{ isCreatingEvent ? 'Guardando...' : 'Crear Evento' }}
               </UiButton>
             </form>
-          </UiCardContent>
-        </UiCard>
-
-        <!-- Profile Card -->
-        <UiCard class="border-stone-200 shadow-sm">
-          <UiCardHeader class="pb-3">
-            <UiCardTitle class="text-sm">Gestión de Cuenta</UiCardTitle>
-          </UiCardHeader>
-          <UiCardContent>
-            <NuxtLink to="/dashboard/profile" class="flex items-center gap-3 p-3 bg-stone-50 rounded-xl hover:bg-primary-50 hover:text-primary-800 transition-all font-bold text-sm text-stone-600">
-               <span>👤</span> Mi Perfil
-            </NuxtLink>
           </UiCardContent>
         </UiCard>
       </div>
@@ -501,6 +499,115 @@
         </div>
       </div>
     </div>
+
+    <!-- Mobile Menu Modal -->
+    <div v-if="showMobileMenu" class="fixed inset-0 z-[100] bg-zinc-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div @click.self="showMobileMenu = false" class="absolute inset-0"></div>
+      <div class="bg-white w-full sm:max-w-xs rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative animate-in slide-in-from-bottom duration-300 overflow-hidden">
+        <div class="p-6 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+            <h3 class="font-black text-stone-800 uppercase tracking-widest text-xs">Menú Principal</h3>
+            <button @click="showMobileMenu = false" class="text-stone-400 hover:text-stone-900">✕</button>
+        </div>
+        <div class="p-4 space-y-2">
+            <NuxtLink to="/dashboard/profile" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-sm font-black border border-transparent hover:bg-stone-50 text-stone-700">
+              <span class="text-xl">👤</span>
+              Mi Perfil
+            </NuxtLink>
+            <a v-if="user?.role === 'admin'" href="/admin" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-sm font-black border border-transparent hover:bg-amber-50 text-amber-700">
+              <span class="text-xl">🛡️</span>
+              Admin Panel
+            </a>
+            <hr class="border-stone-100 my-2" />
+            <button @click="logout" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-stone-400 font-bold text-sm text-left hover:bg-rose-50 hover:text-rose-600 transition-colors">
+              <span class="text-xl">🚪</span>
+              Cerrar Sesión
+            </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Event Modal (Mobile only) -->
+    <div v-if="showCreateEventModal" class="fixed inset-0 z-[60] bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-stone-200 flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-300">
+        <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+          <div>
+            <h3 class="text-xl font-bold text-stone-900">Nuevo Evento</h3>
+            <p class="text-sm text-stone-500">Completa los datos para tu celebración</p>
+          </div>
+          <button @click="showCreateEventModal = false" class="text-stone-400 hover:text-stone-900 text-2xl">&times;</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6">
+            <form @submit.prevent="createEventWithClose" class="space-y-4">
+                <div class="space-y-2">
+                  <UiLabel for="m-name">Nombre de Evento</UiLabel>
+                  <UiInput id="m-name" v-model="newEvent.name" placeholder="Ej: Boda de Ana y Juan" />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <UiLabel for="m-date">Fecha</UiLabel>
+                      <UiInput id="m-date" type="date" v-model="newEvent.date" />
+                    </div>
+                    <div class="space-y-2">
+                        <UiLabel for="m-category">Categoría</UiLabel>
+                        <select id="m-category" v-model="newEvent.category_id" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none">
+                          <option :value="null">Seleccionar...</option>
+                          <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <UiLabel for="m-region">Región</UiLabel>
+                      <select id="m-region" v-model="selectedRegionId" @change="handleRegionChange" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none">
+                        <option :value="null">Seleccionar...</option>
+                        <option v-for="reg in regions" :key="reg.id" :value="reg.id">{{ reg.name }}</option>
+                      </select>
+                    </div>
+                    <div class="space-y-2">
+                      <UiLabel for="m-city">Ciudad</UiLabel>
+                      <select id="m-city" v-model="newEvent.city_id" class="w-full h-10 px-3 rounded-md border border-stone-200 bg-white text-sm focus:ring-2 focus:ring-primary outline-none" :disabled="!selectedRegionId || isLoadingCities">
+                        <option :value="null">{{ isLoadingCities ? '...' : 'Seleccionar...' }}</option>
+                        <option v-for="city in citiesList" :key="city.id" :value="city.id">{{ city.name }}</option>
+                      </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                  <UiLabel for="m-address">Dirección (Opcional)</UiLabel>
+                  <UiInput id="m-address" v-model="newEvent.address" placeholder="Ej: Av. Las Condes 123" />
+                </div>
+
+                <div class="flex items-center gap-2 py-1">
+                  <input type="checkbox" id="m-isPublic" v-model="newEvent.is_location_public" class="w-4 h-4 rounded border-stone-300 text-primary-600 focus:ring-primary" />
+                  <UiLabel for="m-isPublic" class="text-xs font-semibold text-stone-700 cursor-pointer">Mostrar ubicación pública</UiLabel>
+                </div>
+
+                <div class="pt-4 border-t border-stone-100 space-y-4">
+                  <div class="space-y-2">
+                    <UiLabel for="m-budget">Meta de Recaudación (Opcional)</UiLabel>
+                    <div class="relative">
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-bold">$</span>
+                      <UiInput id="m-budget" type="number" v-model="newEvent.creator_budget" placeholder="Ej: 500000" class="pl-8" />
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-100 italic">
+                    <input type="checkbox" id="m-requestService" v-model="newEvent.requests_internal_service" class="w-4 h-4 rounded border-stone-300 text-primary-600 focus:ring-primary" />
+                    <UiLabel for="m-requestService" class="text-[10px] font-bold text-amber-800 cursor-pointer">Deseo contratar servicio interno</UiLabel>
+                  </div>
+                </div>
+                
+                <div class="pt-2">
+                    <UiButton type="submit" class="w-full bg-primary hover:bg-primary-700 text-white font-bold h-12" :disabled="isCreatingEvent">
+                      {{ isCreatingEvent ? 'Guardando...' : 'Crear Evento' }}
+                    </UiButton>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -513,13 +620,22 @@ useHead({ title: 'Dashboard - Mi Regalo, Tu Fiesta' });
 
 const router = useRouter();
 const route = useRoute();
+const config = useRuntimeConfig();
 const token = useCookie('auth_token');
+
+const showMobileMenu = ref(false);
+const showCreateEventModal = ref(false);
+
+const createEventWithClose = async () => {
+    await createEvent();
+    if (!isCreatingEvent.value) {
+        showCreateEventModal.value = false;
+    }
+};
 
 if (!token.value) {
   router.push('/login');
 }
-
-const config = useRuntimeConfig();
 
 const { data: events, pending: pendingEvents, refresh } = await useFetch<any>(`${config.public.apiBase}/api/events`, {
   headers: { Authorization: `Bearer ${token.value}` }

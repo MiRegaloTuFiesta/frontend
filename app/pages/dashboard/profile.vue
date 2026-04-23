@@ -10,28 +10,35 @@
           </NuxtLink>
         </div>
         <h1 class="text-lg font-bold text-stone-800 absolute left-1/2 -translate-x-1/2 hidden md:block">Mi Perfil</h1>
-        <nav class="flex items-center gap-4">
+        <nav class="flex items-center gap-2 sm:gap-4">
           <span class="text-sm font-medium text-stone-500 hidden sm:block">{{ user?.name }}</span>
-          <UiButton @click="logout" variant="ghost" size="sm" class="text-stone-400">Cerrar Sesión</UiButton>
+          <UiButton @click="logout" variant="ghost" size="sm" class="text-stone-400 hidden sm:flex">Cerrar Sesión</UiButton>
+          <UiButton @click="showMobileMenu = true" variant="outline" size="sm" class="md:hidden border-stone-200 text-stone-600 font-bold gap-2">
+            <span>☰</span>
+            <span class="text-[10px] uppercase tracking-wider">Menú</span>
+          </UiButton>
         </nav>
       </div>
     </header>
 
     <main class="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+      <!-- Mobile Current Section Indicator -->
+      <div class="md:hidden mb-6 flex items-center justify-between bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
+        <div class="flex items-center gap-3">
+            <span class="text-xl">{{ tabIcons[activeTab] }}</span>
+            <div>
+                <p class="text-[10px] font-black uppercase text-stone-400 tracking-widest leading-none">Sección Actual</p>
+                <p class="text-sm font-black text-stone-800 mt-1">{{ tabNames[activeTab] }}</p>
+            </div>
+        </div>
+        <UiButton @click="showMobileMenu = true" variant="ghost" class="text-primary font-black text-xs uppercase tracking-tight">Cambiar</UiButton>
+      </div>
+
       <div class="grid md:grid-cols-3 gap-8">
-        <!-- Sidebar Navigation (Profile specific) -->
-        <div class="md:col-span-1 space-y-2">
-          <button @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
-            <span>👤</span> Datos Generales
-          </button>
-          <button @click="activeTab = 'bank'" :class="activeTab === 'bank' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
-            <span>🏦</span> Datos Bancarios
-          </button>
-          <button @click="activeTab = 'password'" :class="activeTab === 'password' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
-            <span>🔒</span> Seguridad
-          </button>
-          <button @click="activeTab = 'payouts'" :class="activeTab === 'payouts' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
-            <span>💸</span> Cobros y Depósitos
+        <!-- Sidebar Navigation (Desktop only) -->
+        <div class="hidden md:block md:col-span-1 space-y-2">
+          <button v-for="(name, id) in tabNames" :key="id" @click="activeTab = id" :class="activeTab === id ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
+            <span>{{ tabIcons[id] }}</span> {{ name }}
           </button>
         </div>
 
@@ -168,11 +175,33 @@
         </div>
       </div>
     </main>
+
+    <!-- Mobile Menu Modal -->
+    <div v-if="showMobileMenu" class="fixed inset-0 z-[100] bg-zinc-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div @click.self="showMobileMenu = false" class="absolute inset-0"></div>
+      <div class="bg-white w-full sm:max-w-xs rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl relative animate-in slide-in-from-bottom duration-300 overflow-hidden">
+        <div class="p-6 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+            <h3 class="font-black text-stone-800 uppercase tracking-widest text-xs">Gestión de Perfil</h3>
+            <button @click="showMobileMenu = false" class="text-stone-400 hover:text-stone-900">✕</button>
+        </div>
+        <div class="p-4 space-y-2">
+            <button v-for="(name, id) in tabNames" :key="id" @click="activeTab = id; showMobileMenu = false" :class="activeTab === id ? 'bg-primary/10 text-primary border-primary scale-[1.02]' : 'text-stone-600 border-transparent hover:bg-stone-50'" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all text-sm font-black border text-left">
+              <span class="text-xl">{{ tabIcons[id] }}</span>
+              {{ name }}
+            </button>
+            <hr class="border-stone-100 my-2" />
+            <button @click="logout" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-stone-400 font-bold text-sm text-left hover:bg-rose-50 hover:text-rose-600 transition-colors">
+              <span class="text-xl">🚪</span>
+              Cerrar Sesión
+            </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useCookie, useRouter, useFetch, useRuntimeConfig } from '#imports';
 
 const router = useRouter();
@@ -185,6 +214,21 @@ if (!token.value) {
 
 const activeTab = ref('general');
 const isSaving = ref(false);
+const showMobileMenu = ref(false);
+
+const tabNames = {
+    general: 'Datos Generales',
+    bank: 'Datos Bancarios',
+    password: 'Seguridad',
+    payouts: 'Cobros y Depósitos'
+};
+
+const tabIcons = {
+    general: '👤',
+    bank: '🏦',
+    password: '🔒',
+    payouts: '💸'
+};
 
 const { data: user, refresh: refreshUser } = await useFetch<any>(`${config.public.apiBase}/api/user`, {
   headers: { Authorization: `Bearer ${token.value}` }
