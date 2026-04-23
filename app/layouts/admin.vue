@@ -81,6 +81,7 @@ const tabs = [
   { id: 'events', name: 'Gestión de Eventos', icon: '📅', path: '/admin/events' },
   { id: 'users', name: 'Usuarios', icon: '👥', path: '/admin/users' },
   { id: 'payments', name: 'Pagos Recibidos', icon: '💸', path: '/admin/payments' },
+  { id: 'payouts', name: 'Gestionar Depósitos', icon: '💰', path: '/admin/payouts' },
   { id: 'categories', name: 'Categorías', icon: '🏷️', path: '/admin/categories' },
   { id: 'banks', name: 'Bancos y Cuentas', icon: '🏦', path: '/admin/banks' },
   { id: 'reports', name: 'Reportes', icon: '⚐', path: '/admin/reports' },

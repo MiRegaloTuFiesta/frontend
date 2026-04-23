@@ -54,6 +54,11 @@
                 </div>
 
                 <div class="space-y-2">
+                  <UiLabel>RUT del Titular</UiLabel>
+                  <UiInput v-model="form.bank_rut" placeholder="12.345.678-9" required />
+                </div>
+
+                <div class="space-y-2">
                   <UiLabel>Número de Cuenta</UiLabel>
                   <UiInput v-model="form.account_number" placeholder="Ej: 12345678" required />
                 </div>
@@ -99,7 +104,8 @@ const form = ref({
   phone: '',
   bank_id: null as number | null,
   account_type_id: null as number | null,
-  account_number: ''
+  account_number: '',
+  bank_rut: ''
 });
 
 const isLoading = ref(false);

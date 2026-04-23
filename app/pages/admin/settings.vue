@@ -46,9 +46,15 @@
               <UiInput type="number" step="1" v-model="settingsForm.iva_percent" />
             </div>
           </div>
-          <div class="space-y-2 pt-2">
-            <UiLabel>Monto Mínimo de Aporte (CLP)</UiLabel>
-            <UiInput type="number" v-model="settingsForm.min_contribution_amount" />
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <UiLabel>Monto Mínimo de Aporte (CLP)</UiLabel>
+              <UiInput type="number" v-model="settingsForm.min_contribution_amount" />
+            </div>
+            <div class="space-y-2">
+              <UiLabel>Días para el pago (Depósitos)</UiLabel>
+              <UiInput type="number" v-model="settingsForm.payout_days" placeholder="Ej: 3" />
+            </div>
           </div>
         </div>
 
@@ -131,10 +137,9 @@ const settingsForm = ref({
   flow_fee_fixed: '0',
   mp_fee_percent: '0',
   mp_fee_fixed: '0',
-  enable_flow: '1',
-  enable_mp: '1',
   enable_transfer: '0',
-  transfer_bank_details: ''
+  transfer_bank_details: '',
+  payout_days: '3'
 });
 
 watch(settingsData, (val) => {

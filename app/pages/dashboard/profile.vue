@@ -30,6 +30,9 @@
           <button @click="activeTab = 'password'" :class="activeTab === 'password' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
             <span>🔒</span> Seguridad
           </button>
+          <button @click="activeTab = 'payouts'" :class="activeTab === 'payouts' ? 'bg-primary text-white shadow-md' : 'bg-white text-stone-600 hover:bg-stone-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-bold border border-transparent">
+            <span>💸</span> Cobros y Depósitos
+          </button>
         </div>
 
         <!-- Content -->
@@ -86,9 +89,14 @@
               </div>
 
               <div class="space-y-2">
+                <UiLabel>RUT del Titular</UiLabel>
+                <UiInput v-model="profileForm.bank_rut" placeholder="12.345.678-9" :disabled="!profileForm.account_type_id" />
+              </div>
+
+              <div class="space-y-2">
                 <UiLabel>Número de Cuenta</UiLabel>
                 <UiInput v-model="profileForm.account_number" placeholder="Ej: 12345678" :disabled="!profileForm.account_type_id" />
-                <p v-if="profileForm.bank_id && !profileForm.account_number" class="text-[10px] text-amber-600 font-bold">⚠️ Si ingresas datos bancarios, el número de cuenta es obligatorio.</p>
+                <p v-if="profileForm.bank_id && (!profileForm.account_number || !profileForm.bank_rut)" class="text-[10px] text-amber-600 font-bold">⚠️ Si ingresas datos bancarios, el RUT y número de cuenta son obligatorios.</p>
               </div>
 
               <div class="pt-4">
@@ -126,6 +134,37 @@
               </div>
             </UiCardContent>
           </UiCard>
+
+          <!-- Payouts Tab -->
+          <div v-if="activeTab === 'payouts'" class="space-y-6 animate-in fade-in duration-300">
+            <UiCard class="border-stone-200 shadow-sm overflow-hidden">
+                <div class="bg-primary-600 p-8 text-white">
+                    <h3 class="text-lg font-bold">Estado de Cobros</h3>
+                    <p class="text-primary-100 text-xs">Resumen de tus recaudaciones y depósitos recibidos</p>
+                </div>
+                <UiCardContent class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="p-4 bg-stone-50 border border-stone-100 rounded-2xl">
+                        <p class="text-[10px] font-black uppercase text-stone-400 tracking-widest mb-1">Pagos Pendientes</p>
+                        <p class="text-2xl font-black text-stone-900">{{ formatCurrency(payoutData?.pending_balance || 0) }}</p>
+                        <p class="text-[10px] text-stone-500 mt-2 leading-tight">Monto recaudado de tus invitados que aún no ha sido transferido a tu cuenta bancaria.</p>
+                    </div>
+                    <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                        <p class="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">Transferencias Completadas</p>
+                        <p class="text-2xl font-black text-emerald-700">{{ formatCurrency(payoutData?.completed_balance || 0) }}</p>
+                        <p class="text-[10px] text-emerald-600 mt-2 leading-tight">Monto total que ya hemos depositado exitosamente en tu cuenta históricamente.</p>
+                    </div>
+                </UiCardContent>
+            </UiCard>
+
+            <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+                <span class="text-xl">ℹ️</span>
+                <div class="text-xs text-amber-800 space-y-1">
+                    <p class="font-bold">Política de Depósitos</p>
+                    <p>Los depósitos se realizan en un plazo máximo de de <strong>{{ payoutDays }} días hábiles</strong> tras recibirse el aporte del invitado.</p>
+                    <p>Asegúrate de tener tus <button @click="activeTab = 'bank'" class="underline font-bold">datos bancarios</button> actualizados para evitar retrasos.</p>
+                </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -153,6 +192,13 @@ const { data: user, refresh: refreshUser } = await useFetch<any>(`${config.publi
 
 const { data: banks } = await useFetch<any>(`${config.public.apiBase}/api/banks`);
 
+const { data: payoutData } = await useFetch<any>(`${config.public.apiBase}/api/user/payouts`, {
+  headers: { Authorization: `Bearer ${token.value}` }
+});
+
+const { data: publicSettings } = await useFetch<any>(`${config.public.apiBase}/api/settings/public`);
+const payoutDays = computed(() => publicSettings.value?.payout_days || '3');
+
 const profileForm = ref({
     name: user.value?.name || '',
     email: user.value?.email || '',
@@ -160,6 +206,7 @@ const profileForm = ref({
     bank_id: user.value?.bank_id || null,
     account_type_id: user.value?.account_type_id || null,
     account_number: user.value?.account_number || '',
+    bank_rut: user.value?.bank_rut || '',
 });
 
 const passwordForm = ref({
@@ -216,5 +263,9 @@ const changePassword = async () => {
 const logout = () => {
     token.value = null;
     router.push('/login');
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
 };
 </script>
