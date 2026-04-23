@@ -164,8 +164,8 @@
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-zinc-400">$</span>
                 <UiInput id="totalPrice" type="number" v-model="approvalForm.total_price" class="pl-8 h-12 text-lg font-bold" placeholder="Ej: 500000" required />
               </div>
-              <p v-if="manualPaymentsSum > 0" class="text-[10px] text-amber-600 font-medium italic">
-                * La meta efectiva mostrada al usuario será ${{ formatNumber(approvalForm.total_price + (approvalForm.service_adds_to_total ? approvalForm.service_cost : 0) - manualPaymentsSumTotal) }} tras descontar los abonos.
+              <p v-if="manualPaymentsSum > 0" class="text-[10px] text-emerald-600 font-bold italic mt-2">
+                * Tienes {{ formatNumber(manualPaymentsSum) }} en abonos manuales registrados. Estos se depositarán al anfitrión como un ingreso adicional y no restan de esta meta de recaudación.
               </p>
             </div>
 
