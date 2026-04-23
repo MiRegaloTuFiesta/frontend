@@ -83,6 +83,7 @@ const tabs = [
   { id: 'payments', name: 'Pagos Recibidos', icon: '💸', path: '/admin/payments' },
   { id: 'categories', name: 'Categorías', icon: '🏷️', path: '/admin/categories' },
   { id: 'reports', name: 'Reportes', icon: '⚐', path: '/admin/reports' },
+  { id: 'wish-templates', name: 'Plantillas de Deseos', icon: '📋', path: '/admin/wish-templates' },
   { id: 'settings', name: 'Configuración', icon: '⚙️', path: '/admin/settings' },
 ];
 

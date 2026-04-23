@@ -188,7 +188,10 @@
               <div class="space-y-4">
                 <div class="flex justify-between items-center bg-white">
                   <h3 class="font-bold text-stone-800">Lista de Deseos ({{ evt.wishes?.length || 0 }})</h3>
-                  <UiButton size="sm" variant="secondary" @click="openWishModal(evt.id)">+ Agregar Deseo</UiButton>
+                  <div class="flex items-center gap-2">
+                    <UiButton size="sm" variant="outline" @click="openTemplateSelectionModal(evt.id)" class="text-[10px] font-bold border-stone-200">📋 Usar Plantilla</UiButton>
+                    <UiButton size="sm" variant="secondary" @click="openWishModal(evt.id)">+ Agregar Deseo</UiButton>
+                  </div>
                 </div>
 
                 <div v-if="evt.wishes && evt.wishes.length > 0" class="grid sm:grid-cols-2 gap-4">
@@ -233,6 +236,60 @@
         </div>
       </div>
     </main>
+
+    <!-- Modal Selector de Plantillas -->
+    <div v-if="isTemplateSelectionModalOpen" class="fixed inset-0 z-[60] bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden border border-stone-200 flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-300">
+        <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+          <div>
+            <h3 class="text-xl font-bold text-stone-900">Usar una Plantilla</h3>
+            <p class="text-sm text-stone-500">Selecciona un regalo predefinido para tu lista</p>
+          </div>
+          <button @click="isTemplateSelectionModalOpen = false" class="text-stone-400 hover:text-stone-900 text-2xl">&times;</button>
+        </div>
+
+        <div class="p-4 border-b border-stone-100 bg-white flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">🔍</span>
+            <UiInput v-model="templateSearch" placeholder="Buscar regalo..." class="pl-9 h-10 text-sm" />
+          </div>
+          <select v-model="templateCategory" class="h-10 px-3 rounded-lg border border-stone-200 bg-stone-50 text-sm outline-none focus:ring-2 focus:ring-primary-500 min-w-[150px]">
+            <option value="">Todas las categorías</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 bg-stone-50/50">
+          <div v-if="loadingTemplates" class="flex flex-col items-center justify-center py-12">
+            <div class="animate-spin text-3xl mb-4">🔄</div>
+            <p class="text-stone-400 font-medium text-sm">Cargando plantillas...</p>
+          </div>
+          <div v-else-if="publicTemplates?.length > 0" class="grid sm:grid-cols-2 gap-4">
+            <div 
+              v-for="tpl in publicTemplates" 
+              :key="tpl.id" 
+              @click="selectTemplate(tpl)"
+              class="p-4 bg-white border border-stone-200 rounded-2xl hover:border-primary-400 hover:shadow-md transition-all cursor-pointer group flex flex-col h-full shadow-sm"
+            >
+              <h4 class="font-bold text-stone-900 group-hover:text-primary-600 transition-colors leading-tight">{{ tpl.name }}</h4>
+              <p class="text-[11px] text-stone-500 mt-1 line-clamp-3 leading-relaxed flex-1">{{ tpl.description }}</p>
+              <div class="flex flex-wrap gap-1 mt-4">
+                <span v-for="cat in tpl.categories" :key="cat.id" class="text-[9px] font-black uppercase px-1.5 py-0.5 bg-stone-100 text-stone-500 rounded border border-stone-200">
+                  {{ cat.name }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-12">
+            <p class="text-stone-400 italic text-sm">No se encontraron plantillas que coincidan.</p>
+          </div>
+        </div>
+        
+        <div class="p-4 border-t border-stone-100 bg-white flex justify-end">
+          <UiButton @click="isTemplateSelectionModalOpen = false" variant="ghost" class="text-stone-400 text-sm">Cerrar</UiButton>
+        </div>
+      </div>
+    </div>
 
     <!-- Modal agregar/editar deseo -->
     <div v-if="isWishModalOpen" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4">
@@ -434,6 +491,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useCookie, useRouter, useRoute, useHead, useFetch } from '#imports';
+import { refDebounced } from '@vueuse/core';
 
 useHead({ title: 'Dashboard - Mi Regalo, Tu Fiesta' });
 
@@ -601,6 +659,32 @@ const newWish = ref({ name: '', description: '', liquid_amount: '', target_amoun
 
 const isContributionsModalOpen = ref(false);
 const selectedWishContributions = ref<any>(null);
+
+const isTemplateSelectionModalOpen = ref(false);
+const templateSearch = ref('');
+const templateCategory = ref('');
+const debouncedTemplateSearch = refDebounced(templateSearch, 300);
+
+const { data: publicTemplates, pending: loadingTemplates } = await useFetch<any>(`${config.public.apiBase}/api/wish-templates`, {
+  headers: { Authorization: `Bearer ${token.value}` },
+  query: { 
+    search: debouncedTemplateSearch, 
+    category_id: templateCategory 
+  },
+  watch: [debouncedTemplateSearch, templateCategory]
+});
+
+const openTemplateSelectionModal = (eventId: number) => {
+  selectedEventId.value = eventId;
+  isTemplateSelectionModalOpen.value = true;
+};
+
+const selectTemplate = (tpl: any) => {
+  openWishModal(selectedEventId.value!); // Reset form and open modal
+  newWish.value.name = tpl.name;
+  newWish.value.description = tpl.description || '';
+  isTemplateSelectionModalOpen.value = false;
+};
 
 const openWishContributionsModal = (wish: any) => {
   selectedWishContributions.value = wish;
