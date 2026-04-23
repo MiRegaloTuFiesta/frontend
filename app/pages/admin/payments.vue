@@ -80,10 +80,15 @@
           <p class="text-2xl font-extrabold text-zinc-500">${{ formatNumber(paymentsResponse?.stats?.total_gateway_fee) }}</p>
           <p class="text-[10px] text-zinc-400 mt-2">Costo Flow / MP + IVA</p>
         </div>
+        <div class="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm bg-gradient-to-br from-white to-zinc-50">
+          <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Neto ya Transferido</p>
+          <p class="text-2xl font-extrabold text-emerald-600">${{ formatNumber(paymentsResponse?.stats?.total_deposited) }}</p>
+          <p class="text-[10px] text-emerald-500 mt-2">Monto total depositado a anfitriones</p>
+        </div>
         <div class="p-6 rounded-2xl border border-zinc-100 shadow-sm bg-primary-900 text-white">
-          <p class="text-[10px] font-bold text-primary-300 uppercase tracking-widest mb-1">Neto a Transferir</p>
+          <p class="text-[10px] font-bold text-primary-300 uppercase tracking-widest mb-1">Neto Pendiente</p>
           <p class="text-2xl font-extrabold">${{ formatNumber(paymentsResponse?.stats?.total_net) }}</p>
-          <p class="text-[10px] text-primary-400 mt-2">Monto final para anfitriones</p>
+          <p class="text-[10px] text-primary-400 mt-2">Monto pendiente por transferir (Saldo)</p>
         </div>
      </div>
 
@@ -165,9 +170,15 @@
                 <div v-else class="text-[10px] text-zinc-400 italic">Sin comisiones</div>
              </td>
              <td class="p-6">
-                <span v-if="p.type !== 'manual_service'" class="bg-primary-50 text-primary-700 px-2 py-1 rounded-md text-sm font-extrabold">
-                  ${{ formatNumber(p.net_to_user) }}
-                </span>
+                <div v-if="p.type !== 'manual_service'" class="flex flex-col gap-1">
+                  <span class="bg-primary-50 text-primary-700 px-2 py-1 rounded-md text-sm font-extrabold w-fit">
+                    ${{ formatNumber(p.net_to_user) }}
+                  </span>
+                  <span v-if="p.is_deposited" class="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Depositado
+                  </span>
+                  <span v-else class="text-[9px] font-black text-zinc-400 uppercase">Pendiente</span>
+                </div>
                 <span v-else class="text-zinc-300 text-xs strike-through italic">No aplica</span>
              </td>
              <td class="p-6">

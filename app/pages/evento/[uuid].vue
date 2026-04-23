@@ -340,7 +340,7 @@ const totalCurrentAmount = computed(() => {
 });
 
 const globalProgress = computed(() => {
-  const effectiveMeta = (event.value?.total_price || 0) - (event.value?.manual_payments_sum_amount || 0);
+  const effectiveMeta = (event.value?.total_price || 0);
   if (effectiveMeta <= 0) return 0;
   const p = (totalCurrentAmount.value / effectiveMeta) * 100;
   return p > 100 ? 100 : p;

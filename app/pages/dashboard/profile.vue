@@ -155,10 +155,16 @@
                         <p class="text-2xl font-black text-stone-900">{{ formatCurrency(payoutData?.pending_balance || 0) }}</p>
                         <p class="text-[10px] text-stone-500 mt-2 leading-tight">Monto recaudado de tus invitados que aún no ha sido transferido a tu cuenta bancaria.</p>
                     </div>
-                    <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                    <div 
+                        @click="openHistoryModal"
+                        class="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl cursor-pointer hover:bg-emerald-100 transition-all group relative overflow-hidden"
+                    >
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="text-emerald-400">🔍</span>
+                        </div>
                         <p class="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-1">Transferencias Completadas</p>
                         <p class="text-2xl font-black text-emerald-700">{{ formatCurrency(payoutData?.completed_balance || 0) }}</p>
-                        <p class="text-[10px] text-emerald-600 mt-2 leading-tight">Monto total que ya hemos depositado exitosamente en tu cuenta históricamente.</p>
+                        <p class="text-[10px] text-emerald-600 mt-2 leading-tight">Monto total depositado. Haz clic para ver el historial detallado.</p>
                     </div>
                 </UiCardContent>
             </UiCard>
@@ -197,6 +203,50 @@
         </div>
       </div>
     </div>
+
+    <!-- History Modal -->
+    <div v-if="showHistoryModal" class="fixed inset-0 z-[110] bg-zinc-900/60 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border border-stone-200 flex flex-col max-h-[85vh] animate-in zoom-in duration-300">
+            <div class="p-8 border-b border-stone-50 bg-stone-50/50 flex items-center justify-between">
+                <div>
+                    <h3 class="font-black text-stone-900 uppercase tracking-widest text-xs">Historial de Depósitos</h3>
+                    <p class="text-xs text-stone-500 font-bold mt-1">Registros de transferencias realizadas</p>
+                </div>
+                <button @click="showHistoryModal = false" class="text-stone-400 hover:text-stone-900 text-2xl">✕</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
+                <div v-if="payoutData?.history?.length > 0" class="space-y-4">
+                    <div v-for="h in payoutData.history" :key="h.date" class="bg-stone-50 border border-stone-100 rounded-2xl overflow-hidden">
+                        <div class="p-4 bg-white border-b border-stone-100 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] font-black uppercase text-stone-400">Fecha de Depósito</p>
+                                <p class="text-sm font-black text-stone-800">{{ h.date }}</p>
+                            </div>
+                            <p class="text-lg font-black text-emerald-600">{{ formatCurrency(h.amount) }}</p>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div v-for="d in h.details" :key="d.id" class="flex justify-between items-center text-xs">
+                                <div class="space-y-0.5">
+                                    <p class="font-black text-stone-800">{{ d.wish_name }}</p>
+                                    <p class="text-[10px] text-stone-400 uppercase font-bold">{{ d.event_name }} • {{ d.donor_name }}</p>
+                                </div>
+                                <p class="font-bold text-emerald-700">{{ formatCurrency(d.amount) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-center py-12">
+                    <p class="text-stone-400 font-bold italic">Aún no registras depósitos completados.</p>
+                </div>
+            </div>
+
+            <div class="p-6 bg-zinc-900 text-white flex justify-between items-center">
+                <span class="text-[10px] font-bold uppercase text-stone-400">Total Histórico:</span>
+                <span class="text-xl font-black">{{ formatCurrency(payoutData?.completed_balance || 0) }}</span>
+            </div>
+        </div>
+    </div>
   </div>
 </template>
 
@@ -215,6 +265,11 @@ if (!token.value) {
 const activeTab = ref('general');
 const isSaving = ref(false);
 const showMobileMenu = ref(false);
+const showHistoryModal = ref(false);
+
+const openHistoryModal = () => {
+    showHistoryModal.value = true;
+};
 
 const tabNames = {
     general: 'Datos Generales',
