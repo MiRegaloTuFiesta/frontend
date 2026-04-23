@@ -216,7 +216,7 @@
             </div>
             
             <div class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
-                <div v-if="payoutData?.history?.length > 0" class="space-y-4">
+                <div v-if="payoutData && payoutData.history && payoutData.history.length > 0" class="space-y-4">
                     <div v-for="h in payoutData.history" :key="h.date" class="bg-stone-50 border border-stone-100 rounded-2xl overflow-hidden">
                         <div class="p-4 bg-white border-b border-stone-100 flex justify-between items-center">
                             <div>
@@ -271,14 +271,14 @@ const openHistoryModal = () => {
     showHistoryModal.value = true;
 };
 
-const tabNames = {
+const tabNames: Record<string, string> = {
     general: 'Datos Generales',
     bank: 'Datos Bancarios',
     password: 'Seguridad',
     payouts: 'Cobros y Depósitos'
 };
 
-const tabIcons = {
+const tabIcons: Record<string, string> = {
     general: '👤',
     bank: '🏦',
     password: '🔒',
