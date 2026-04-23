@@ -61,6 +61,16 @@
           </div>
 
           <div class="space-y-3">
+            <UiLabel for="userPhone" class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Teléfono de Contacto</UiLabel>
+            <UiInput id="userPhone" type="tel" v-model="userForm.phone" placeholder="+56 9 1234 5678" class="h-12" />
+          </div>
+
+          <div v-if="editingUser" class="space-y-1 bg-zinc-50 p-4 rounded-xl border border-zinc-100">
+            <span class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest block">Fecha de Registro</span>
+            <p class="text-sm font-medium text-zinc-900">{{ new Date(editingUser.created_at).toLocaleString() }}</p>
+          </div>
+
+          <div class="space-y-3">
             <UiLabel for="userRole" class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Rol del Sistema</UiLabel>
             <select id="userRole" v-model="userForm.role" class="w-full h-12 px-4 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-medium focus:ring-2 focus:ring-primary-500 outline-none">
               <option value="creator">Creador (Estandar)</option>
@@ -107,11 +117,11 @@ const { data: usersList, refresh: refreshUsers, pending } = await useFetch<any>(
 
 const isUserModalOpen = ref(false);
 const editingUser = ref<any>(null);
-const userForm = ref({ name: '', email: '', role: 'creator' });
+const userForm = ref({ name: '', email: '', phone: '', role: 'creator' });
 
 const openUserModal = (u: any) => {
   editingUser.value = u;
-  userForm.value = { name: u.name, email: u.email, role: u.role };
+  userForm.value = { name: u.name, email: u.email, phone: u.phone || '', role: u.role };
   isUserModalOpen.value = true;
 };
 
