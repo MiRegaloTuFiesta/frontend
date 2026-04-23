@@ -9,8 +9,8 @@
         <h1 class="text-xl font-bold text-primary-800 shrink-0">Panel de Creador</h1>
         
         <!-- Mobile Create Event Button -->
-        <UiButton @click="showCreateEventModal = true" size="sm" class="md:hidden bg-primary text-white font-black text-[10px] uppercase tracking-widest px-4 h-10 shadow-lg shadow-primary-200">
-            + Nuevo Evento
+        <UiButton @click="showCreateEventModal = true" size="sm" class="md:hidden bg-primary text-white font-black text-[10px] tracking-widest px-4 h-10 shadow-lg shadow-primary-200">
+            + Evento
         </UiButton>
         <nav class="flex items-center gap-2 sm:gap-4">
           <UiButton v-if="user?.role === 'admin'" as="a" href="/admin" variant="secondary" size="sm" class="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold hidden sm:flex">Admin Panel</UiButton>
@@ -115,8 +115,8 @@
           
           <UiCard v-for="evt in events" :key="evt.id" class="border-stone-200 shadow-sm">
             <UiCardHeader>
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
+              <div class="flex flex-col sm:flex-row sm:justify-between items-start gap-4">
+                <div class="flex-1 w-full">
                   <UiCardTitle class="text-xl">{{ evt.name }}</UiCardTitle>
                   <UiCardDescription>
                     Fecha: {{ new Date(evt.date + 'T12:00:00').toLocaleDateString('es-CL') }}
@@ -126,7 +126,7 @@
                     </div>
                   </UiCardDescription>
                 </div>
-                <div class="flex items-center gap-2 shrink-0 ml-4">
+                <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto sm:ml-4">
                   <UiButton @click="openEditModal(evt)" variant="outline" size="sm" class="text-stone-600">
                     ✏️ Editar
                   </UiButton>
@@ -135,7 +135,7 @@
                       Ver Público
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                     </UiButton>
-                    <div v-if="activeShareMenu === evt.id" class="absolute right-0 top-full mt-2 p-3 bg-white border border-stone-200 shadow-xl rounded-xl z-50 w-72 origin-top-right">
+                    <div v-if="activeShareMenu === evt.id" class="absolute right-0 sm:right-auto sm:left-0 top-full mt-2 p-3 bg-white border border-stone-200 shadow-xl rounded-xl z-50 w-72 origin-top-right sm:origin-top-left">
                       <p class="text-xs font-semibold text-stone-500 mb-2 uppercase">Comparte tu evento</p>
                       <div class="flex items-center gap-2 mb-2">
                         <input type="text" readonly :value="getPublicUrl(evt.uuid)" class="flex-1 bg-stone-50 border border-stone-200 text-xs rounded p-2 text-stone-600 focus:outline-none" />

@@ -84,7 +84,7 @@
               
               <!-- Check completed -->
               <div v-if="wish.status === 'completed'" class="absolute right-[-30px] top-[20px] bg-primary-500 text-white text-xs font-bold py-1 w-[120px] text-center rotate-45 z-10 shadow-sm">
-                COMPLETADO
+                COMPRADO
               </div>
               
               <UiCardHeader>
