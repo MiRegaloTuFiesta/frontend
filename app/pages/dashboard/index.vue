@@ -16,7 +16,10 @@
           <UiButton v-if="user?.role === 'admin'" as="a" href="/admin" variant="secondary" size="sm" class="bg-amber-100 text-amber-800 hover:bg-amber-200 border-none font-bold hidden sm:flex">Admin Panel</UiButton>
           <NuxtLink to="/dashboard/profile" class="text-sm font-bold text-stone-700 hover:text-primary transition-colors hidden sm:flex items-center gap-1.5 group">
             <span class="text-stone-400 group-hover:text-primary transition-colors">👤</span>
-            {{ user?.name || 'Mi Cuenta' }}
+            Editar Mi Perfil
+          </NuxtLink>
+          <NuxtLink to="/dashboard/profile" class="text-sm text-stone-700 hover:text-primary transition-colors hidden sm:flex items-center gap-1.5 group">
+            {{ user?.name || 'Mi Perfil' }}
           </NuxtLink>
           <div class="w-px h-6 bg-stone-200 hidden sm:block mx-1"></div>
           <UiButton v-if="user" @click="logout" variant="ghost" size="sm" class="text-stone-400 hidden sm:flex">Cerrar Sesión</UiButton>
@@ -117,7 +120,36 @@
             <UiCardHeader>
               <div class="flex flex-col sm:flex-row sm:justify-between items-start gap-4">
                 <div class="flex-1 w-full">
-                  <UiCardTitle class="text-xl">{{ evt.name }}</UiCardTitle>
+                  <div class="flex flex-wrap items-center gap-4 mb-2">
+                    <UiCardTitle class="text-xl">{{ evt.name }}</UiCardTitle>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <UiButton @click="openEditModal(evt)" variant="outline" size="sm" class="text-stone-600">
+                        ✏️ Editar Evento
+                      </UiButton>
+                      <div class="relative align-middle items-center flex">
+                        <UiButton @click="toggleShareMenu(evt.id)" variant="outline" size="sm" class="flex items-center gap-2">
+                          Compartir lista de deseos
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </UiButton>
+                        <div v-if="activeShareMenu === evt.id" class="absolute right-0 sm:right-auto sm:left-0 top-full mt-2 p-3 bg-white border border-stone-200 shadow-xl rounded-xl z-50 w-72 origin-top-right sm:origin-top-left">
+                          <p class="text-xs font-semibold text-stone-500 mb-2 uppercase">Comparte tu evento</p>
+                          <div class="flex items-center gap-2 mb-2">
+                            <input type="text" readonly :value="getPublicUrl(evt.uuid)" class="flex-1 bg-stone-50 border border-stone-200 text-xs rounded p-2 text-stone-600 focus:outline-none" />
+                            <UiButton @click="copyToClipboard(getPublicUrl(evt.uuid))" variant="default" size="sm" class="px-3 shrink-0 bg-primary-600 hover:bg-primary-700 text-white border-0">
+                              Copiar
+                            </UiButton>
+                          </div>
+                          <UiButton as="a" :href="'/evento/' + evt.uuid" target="_blank" variant="outline" size="sm" class="w-full text-stone-600 flex justify-center">
+                            Abrir página del evento
+                          </UiButton>
+                        </div>
+                      </div>
+                      <!-- Botón Borrar (Móvil: alineado aquí) -->
+                      <UiButton @click="deleteEvent(evt)" variant="outline" size="sm" class="sm:hidden text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700">
+                        🗑️
+                      </UiButton>
+                    </div>
+                  </div>
                   <UiCardDescription>
                     Fecha: {{ new Date(evt.date + 'T12:00:00').toLocaleDateString('es-CL') }}
                     <span v-if="evt.city" class="block text-xs text-stone-400 mt-1">📍 {{ evt.city.name }}, {{ evt.city.region?.name }}</span>
@@ -126,32 +158,10 @@
                     </div>
                   </UiCardDescription>
                 </div>
-                <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto sm:ml-4">
-                  <UiButton @click="openEditModal(evt)" variant="outline" size="sm" class="text-stone-600">
-                    ✏️ Editar
-                  </UiButton>
-                  <div class="relative align-middle items-center flex">
-                    <UiButton @click="toggleShareMenu(evt.id)" variant="outline" size="sm" class="flex items-center gap-2">
-                      Ver Público
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    </UiButton>
-                    <div v-if="activeShareMenu === evt.id" class="absolute right-0 sm:right-auto sm:left-0 top-full mt-2 p-3 bg-white border border-stone-200 shadow-xl rounded-xl z-50 w-72 origin-top-right sm:origin-top-left">
-                      <p class="text-xs font-semibold text-stone-500 mb-2 uppercase">Comparte tu evento</p>
-                      <div class="flex items-center gap-2 mb-2">
-                        <input type="text" readonly :value="getPublicUrl(evt.uuid)" class="flex-1 bg-stone-50 border border-stone-200 text-xs rounded p-2 text-stone-600 focus:outline-none" />
-                        <UiButton @click="copyToClipboard(getPublicUrl(evt.uuid))" variant="default" size="sm" class="px-3 shrink-0 bg-primary-600 hover:bg-primary-700 text-white border-0">
-                          Copiar
-                        </UiButton>
-                      </div>
-                      <UiButton as="a" :href="'/evento/' + evt.uuid" target="_blank" variant="outline" size="sm" class="w-full text-stone-600 flex justify-center">
-                        Abrir página del evento
-                      </UiButton>
-                    </div>
-                  </div>
-                  <UiButton @click="deleteEvent(evt)" variant="outline" size="sm" class="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700">
-                    🗑️
-                  </UiButton>
-                </div>
+                <!-- Botón Borrar (Escritorio: en la esquina) -->
+                <UiButton @click="deleteEvent(evt)" variant="outline" size="sm" class="hidden sm:flex text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700">
+                  🗑️
+                </UiButton>
               </div>
             </UiCardHeader>
             <UiCardContent>
@@ -174,7 +184,7 @@
                 </div>
                 <div v-if="evt.admin_notes && evt.status === 'approved'" class="ml-auto">
                   <UiButton size="sm" variant="outline" class="bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 font-bold" @click="openAdminNotes(evt)">
-                    📋 Ver Detalles del Ejecutivo
+                    📋 Mensajes del Ejecutivo
                   </UiButton>
                 </div>
               </div>
@@ -200,15 +210,19 @@
 
               <!-- Wishlist Section -->
               <div class="space-y-4">
-                <div class="flex justify-between items-center bg-white">
-                  <h3 class="font-bold text-stone-800">Lista de Deseos ({{ evt.wishes?.length || 0 }})</h3>
-                  <div class="flex items-center gap-2">
-                    <UiButton size="sm" variant="outline" @click="openTemplateSelectionModal(evt.id)" class="text-[10px] font-bold border-stone-200">📋 Usar Plantilla</UiButton>
-                    <UiButton size="sm" variant="secondary" @click="openWishModal(evt.id)">+ Agregar Deseo</UiButton>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
+                  <h3 class="font-bold text-stone-800">Lista de Deseos ({{ getCompletedWishesCount(evt.wishes) }} / {{ evt.wishes?.length || 0 }})</h3>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <UiButton size="sm" variant="outline" @click="toggleWishes(evt.id)" class="border-stone-200">
+                      {{ visibleWishes[evt.id] ? 'Ocultar Deseos' : 'Ver Deseos' }}
+                    </UiButton>
+                    <UiButton size="sm" variant="outline" @click="openTemplateSelectionModal(evt.id)" class="border-stone-200 text-xs sm:text-sm">📋 Nuevo Deseo desde Plantilla</UiButton>
+                    <UiButton size="sm" variant="secondary" class="font-bold text-xs sm:text-sm" @click="openWishModal(evt.id)">+ Nuevo Deseo</UiButton>
                   </div>
                 </div>
 
-                <div v-if="evt.wishes && evt.wishes.length > 0" class="grid sm:grid-cols-2 gap-4">
+                <div v-show="visibleWishes[evt.id]">
+                  <div v-if="evt.wishes && evt.wishes.length > 0" class="grid sm:grid-cols-2 gap-4">
                   <div 
                     v-for="wish in evt.wishes" 
                     :key="wish.id" 
@@ -216,7 +230,7 @@
                     :class="wish.status !== 'completed' ? 'cursor-pointer hover:border-primary-300 hover:bg-stone-50 transition-all' : 'cursor-pointer opacity-90 hover:border-primary-400 hover:shadow-md transition-all'"
                     @click="wish.status !== 'completed' ? openWishModal(evt.id, wish) : openWishContributionsModal(wish)"
                   >
-                    <div v-if="wish.status === 'completed'" class="absolute -top-2 -right-2 bg-primary-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">Completo</div>
+                    <div v-if="wish.status === 'completed'" class="absolute -top-2 -right-2 bg-primary-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">Comprado</div>
                     <h4 class="font-semibold text-stone-900">{{ wish.name }}</h4>
                     <p class="text-xs text-stone-500 mt-1 mb-3">{{ wish.description }}</p>
                     <div class="flex justify-between text-xs font-medium mb-1">
@@ -234,9 +248,10 @@
                       <span class="text-[10px] bg-white border border-primary-200 px-2 py-0.5 rounded shadow-sm text-primary-600 font-bold uppercase">Ver detalles</span>
                     </div>
                   </div>
-                </div>
-                <div v-else class="text-sm text-stone-400 text-center py-6 border border-dashed border-stone-200 rounded-xl">
-                  Aún no hay regalos en la lista. Agrega el primero para empezar a recibir.
+                  </div>
+                  <div v-else class="text-sm text-stone-400 text-center py-6 border border-dashed border-stone-200 rounded-xl">
+                    Aún no hay deseos en la lista. Agrega el primero para empezar a recibir.
+                  </div>
                 </div>
               </div>
 
@@ -257,7 +272,7 @@
         <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
           <div>
             <h3 class="text-xl font-bold text-stone-900">Usar una Plantilla</h3>
-            <p class="text-sm text-stone-500">Selecciona un regalo predefinido para tu lista</p>
+            <p class="text-sm text-stone-500">Selecciona un deseo predefinido para tu lista</p>
           </div>
           <button @click="isTemplateSelectionModalOpen = false" class="text-stone-400 hover:text-stone-900 text-2xl">&times;</button>
         </div>
@@ -374,7 +389,7 @@
           <div class="pt-4 flex justify-end gap-3">
             <UiButton type="button" variant="outline" @click="closeWishModal">Cancelar</UiButton>
             <UiButton type="submit" class="bg-primary text-white" :disabled="isCreatingWish">
-              {{ isCreatingWish ? 'Guardando...' : (isEditingWish ? 'Actualizar Regalo' : 'Agregar Regalo') }}
+              {{ isCreatingWish ? 'Guardando...' : (isEditingWish ? 'Actualizar Deseo' : 'Agregar Deseo') }}
             </UiButton>
           </div>
         </form>
@@ -625,6 +640,16 @@ const token = useCookie('auth_token');
 
 const showMobileMenu = ref(false);
 const showCreateEventModal = ref(false);
+
+const visibleWishes = ref<Record<number, boolean>>({});
+const toggleWishes = (eventId: number) => {
+  visibleWishes.value[eventId] = !visibleWishes.value[eventId];
+};
+
+const getCompletedWishesCount = (wishes: any[]) => {
+  if (!wishes) return 0;
+  return wishes.filter((w: any) => w.status === 'completed').length;
+};
 
 const createEventWithClose = async () => {
     await createEvent();
