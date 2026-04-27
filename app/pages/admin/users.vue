@@ -70,6 +70,29 @@
             <p class="text-sm font-medium text-zinc-900">{{ new Date(editingUser.created_at).toLocaleString() }}</p>
           </div>
 
+          <div v-if="editingUser" class="space-y-1 bg-zinc-50 p-4 rounded-xl border border-zinc-100">
+            <span class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest block mb-2">Datos Bancarios</span>
+            <div v-if="editingUser.bank || editingUser.bank_id" class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-zinc-400 text-[10px] uppercase font-bold block">Banco</span>
+                <p class="font-medium text-zinc-900">{{ editingUser.bank?.name || editingUser.bank_id || 'N/A' }}</p>
+              </div>
+              <div>
+                <span class="text-zinc-400 text-[10px] uppercase font-bold block">Tipo de Cuenta</span>
+                <p class="font-medium text-zinc-900">{{ editingUser.account_type?.name || editingUser.account_type_id || 'N/A' }}</p>
+              </div>
+              <div>
+                <span class="text-zinc-400 text-[10px] uppercase font-bold block">N° de Cuenta</span>
+                <p class="font-medium text-zinc-900">{{ editingUser.account_number || 'N/A' }}</p>
+              </div>
+              <div>
+                <span class="text-zinc-400 text-[10px] uppercase font-bold block">RUT Bancario</span>
+                <p class="font-medium text-zinc-900">{{ editingUser.bank_rut || 'N/A' }}</p>
+              </div>
+            </div>
+            <p v-else class="text-sm text-zinc-400 italic">El usuario aún no registra datos bancarios.</p>
+          </div>
+
           <div class="space-y-3">
             <UiLabel for="userRole" class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Rol del Sistema</UiLabel>
             <select id="userRole" v-model="userForm.role" class="w-full h-12 px-4 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-medium focus:ring-2 focus:ring-primary-500 outline-none">
