@@ -41,7 +41,7 @@
 
     <!-- Modal Editar Usuario -->
     <div v-if="isUserModalOpen" class="fixed inset-0 z-[60] bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl w-full max-md shadow-2xl overflow-hidden border border-zinc-100">
+      <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-zinc-100 flex flex-col max-h-[95vh]">
         <div class="p-8 border-b border-zinc-50 flex justify-between items-center">
           <div>
             <h3 class="text-xl font-bold text-zinc-900">Editar Usuario</h3>
@@ -49,7 +49,7 @@
           </div>
           <button @click="isUserModalOpen = false" class="text-zinc-300 hover:text-zinc-900 text-2xl transition-colors">&times;</button>
         </div>
-        <form @submit.prevent="saveUser" class="p-8 space-y-6">
+        <form @submit.prevent="saveUser" class="p-8 space-y-6 overflow-y-auto flex-1">
           <div class="space-y-3">
             <UiLabel for="userName" class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Nombre Completo</UiLabel>
             <UiInput id="userName" v-model="userForm.name" class="h-12" required />
