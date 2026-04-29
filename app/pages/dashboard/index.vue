@@ -124,11 +124,11 @@
                     <UiCardTitle class="text-xl">{{ evt.name }}</UiCardTitle>
                     <div class="flex items-center gap-2 shrink-0">
                       <UiButton @click="openEditModal(evt)" variant="outline" size="sm" class="text-stone-600">
-                        ✏️ Editar Evento
+                        ✏️ <span class="hidden md:inline">Editar Evento</span><span class="md:hidden">Editar</span>
                       </UiButton>
                       <div class="relative align-middle items-center flex">
                         <UiButton @click="toggleShareMenu(evt.id)" variant="outline" size="sm" class="flex items-center gap-2">
-                          Compartir lista de deseos
+                          <span class="hidden md:inline">Compartir lista de deseos</span><span class="md:hidden">Compartir</span>
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                         </UiButton>
                         <div v-if="activeShareMenu === evt.id" class="absolute right-0 sm:right-auto sm:left-0 top-full mt-2 p-3 bg-white border border-stone-200 shadow-xl rounded-xl z-50 w-72 origin-top-right sm:origin-top-left">

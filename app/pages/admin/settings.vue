@@ -137,6 +137,8 @@ const settingsForm = ref({
   flow_fee_fixed: '0',
   mp_fee_percent: '0',
   mp_fee_fixed: '0',
+  enable_flow: '1',
+  enable_mp: '1',
   enable_transfer: '0',
   transfer_bank_details: '',
   payout_days: '3'
