@@ -33,6 +33,27 @@
           </div>
         </div>
 
+        <!-- Módulos Opcionales -->
+        <div class="space-y-4 p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+          <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-200 pb-2 mb-4">Módulos Opcionales</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input type="checkbox" v-model="settingsForm.enable_manual_payments" true-value="1" false-value="0" class="w-5 h-5 rounded border-zinc-300 text-primary-600 focus:ring-primary-500" />
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-zinc-700 group-hover:text-primary-600 transition-colors">Abonos Manuales</span>
+                <span class="text-[10px] text-zinc-400">Permitir registrar pagos directos por admin</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input type="checkbox" v-model="settingsForm.enable_internal_service" true-value="1" false-value="0" class="w-5 h-5 rounded border-zinc-300 text-primary-600 focus:ring-primary-500" />
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-zinc-700 group-hover:text-primary-600 transition-colors">Solicitar Servicio Interno</span>
+                <span class="text-[10px] text-zinc-400">Opción para contratar servicios adicionales</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <!-- Configuracion Base -->
         <div class="space-y-4">
           <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">Configuración General de Costos</h4>
@@ -141,7 +162,9 @@ const settingsForm = ref({
   enable_mp: '1',
   enable_transfer: '0',
   transfer_bank_details: '',
-  payout_days: '3'
+  payout_days: '3',
+  enable_manual_payments: '1',
+  enable_internal_service: '1'
 });
 
 watch(settingsData, (val) => {

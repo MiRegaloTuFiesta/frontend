@@ -94,7 +94,7 @@
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-100 animate-in fade-in zoom-in duration-200">
+                <div v-if="publicSettings?.enable_internal_service === '1'" class="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-100 animate-in fade-in zoom-in duration-200">
                   <input type="checkbox" id="requestService" v-model="newEvent.requests_internal_service" class="w-4 h-4 rounded border-stone-300 text-primary-600 focus:ring-primary" />
                   <UiLabel for="requestService" class="text-xs font-bold text-amber-800 cursor-pointer italic">Deseo contratar servicio interno</UiLabel>
                 </div>
@@ -608,7 +608,7 @@
                     </div>
                   </div>
 
-                  <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-100 italic">
+                  <div v-if="publicSettings?.enable_internal_service === '1'" class="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-100 italic">
                     <input type="checkbox" id="m-requestService" v-model="newEvent.requests_internal_service" class="w-4 h-4 rounded border-stone-300 text-primary-600 focus:ring-primary" />
                     <UiLabel for="m-requestService" class="text-[10px] font-bold text-amber-800 cursor-pointer">Deseo contratar servicio interno</UiLabel>
                   </div>
@@ -672,6 +672,7 @@ const { data: user } = await useFetch<any>(`${config.public.apiBase}/api/user`, 
 
 const { data: categories } = await useFetch<any>(`${config.public.apiBase}/api/categories`);
 const { data: regions } = await useFetch<any>(`${config.public.apiBase}/api/regions`);
+const { data: publicSettings } = await useFetch<any>(`${config.public.apiBase}/api/settings/public`);
 
 // ─── Geography (CREATE EVENT) ────────────────────────────────────────────────
 const citiesList = ref<any[]>([]);

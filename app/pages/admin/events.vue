@@ -27,7 +27,7 @@
       </div>
 
       <!-- Filtro Servicio -->
-      <div class="flex flex-col gap-1 min-w-[150px]">
+      <div v-if="globalSettings?.enable_internal_service === '1'" class="flex flex-col gap-1 min-w-[150px]">
         <label class="text-[10px] font-bold text-zinc-400 uppercase">Servicio</label>
         <select v-model="filterService" class="px-3 py-2 border border-zinc-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 bg-white">
           <option value="all">Todo</option>
@@ -126,6 +126,7 @@
             ⚙️ Configuración
           </button>
           <button 
+            v-if="globalSettings?.enable_manual_payments === '1' || manualPaymentsSum > 0"
             @click="activeTab = 'payments'" 
             :class="activeTab === 'payments' ? 'border-primary-600 text-primary-600' : 'border-transparent text-zinc-400 hover:text-zinc-600'"
             class="py-4 px-6 border-b-2 font-bold text-sm transition-all flex items-center gap-2"
@@ -170,20 +171,24 @@
             </div>
 
 
-            <div v-if="selectedEvent.requests_internal_service" class="p-6 bg-amber-50 rounded-2xl border border-amber-100 space-y-4">
+            <div v-if="globalSettings?.enable_internal_service === '1' || selectedEvent.requests_internal_service" class="p-6 bg-amber-50 rounded-2xl border border-amber-100 space-y-4">
               <h4 class="text-amber-800 font-bold text-sm flex items-center gap-2">
                 🔧 Gestión de Servicio Interno
               </h4>
               
-              <div class="space-y-3">
+              <div v-if="globalSettings?.enable_internal_service === '1'" class="space-y-3">
                 <UiLabel for="serviceCost" class="text-amber-700 font-bold uppercase text-[10px] tracking-widest">Valor por el Servicio (CLP)</UiLabel>
                 <div class="relative">
                   <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-amber-400">$</span>
                   <UiInput id="serviceCost" type="number" v-model="approvalForm.service_cost" class="pl-8 h-10 border-amber-200 focus:ring-amber-500" placeholder="Ej: 150000" />
                 </div>
               </div>
+              <div v-else class="space-y-1">
+                <p class="text-xs font-bold text-amber-800">Costo del Servicio: ${{ formatNumber(selectedEvent.service_cost) }}</p>
+                <p class="text-[10px] text-amber-600 italic">(Configuración global deshabilitada para nuevos servicios)</p>
+              </div>
 
-              <div class="flex items-center gap-2">
+              <div v-if="globalSettings?.enable_internal_service === '1'" class="flex items-center gap-2">
                 <input type="checkbox" id="addsToTotal" v-model="approvalForm.service_adds_to_total" class="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
                 <UiLabel for="addsToTotal" class="text-xs font-bold text-amber-800 cursor-pointer">Sumar al valor del evento</UiLabel>
               </div>
@@ -239,7 +244,7 @@
           <!-- Tab: Abonos Manuales -->
           <div v-if="activeTab === 'payments'" class="space-y-8">
             <!-- Formulario Nuevo Abono -->
-            <div class="p-6 bg-zinc-50 rounded-2xl border border-zinc-100 space-y-4">
+            <div v-if="globalSettings?.enable_manual_payments === '1'" class="p-6 bg-zinc-50 rounded-2xl border border-zinc-100 space-y-4">
               <h4 class="font-bold text-zinc-800 text-sm">Registrar Nuevo Abono</h4>
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
@@ -268,6 +273,9 @@
                 {{ isStoringPayment ? 'Guardando...' : 'Agregar Abono Manual' }}
               </UiButton>
               <p class="text-[10px] text-zinc-400 italic text-center">Se enviará un correo de notificación al creador.</p>
+            </div>
+            <div v-else-if="manualPayments?.length > 0" class="p-4 bg-amber-50 rounded-xl border border-amber-100 text-[10px] text-amber-700 italic text-center">
+              ⚠️ Los abonos manuales están deshabilitados globalmente. Solo se muestra el historial.
             </div>
 
             <!-- Listado Histórico -->
@@ -353,6 +361,10 @@ definePageMeta({ layout: 'admin' });
 
 const token = useCookie('auth_token');
 const config = useRuntimeConfig();
+
+const { data: globalSettings } = await useFetch<any>(`${config.public.apiBase}/api/admin/settings`, {
+  headers: { Authorization: `Bearer ${token.value}` }
+});
 
 const searchQuery = ref('');
 const debouncedSearch = refDebounced(searchQuery, 400);
