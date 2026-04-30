@@ -4,7 +4,7 @@
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-primary/10 mb-8">
       <div class="container mx-auto px-4 h-16 flex items-center justify-between">
         <div class="text-xl font-bold text-primary-800 tracking-tight flex items-center gap-2">
-          Mi Regalo, Tu Fiesta
+          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-10 w-auto text-primary-800" />
         </div>
       </div>
     </header>
@@ -51,6 +51,9 @@
           </h1>
           <p class="text-stone-500 font-medium text-lg relative z-10">
             {{ new Date(event.date + 'T12:00:00').toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+          </p>
+          <p v-if="event.user" class="text-stone-400 text-sm mt-2 relative z-10">
+            Anfitrión: <span class="font-semibold text-stone-600">{{ event.user.name }}</span>
           </p>
           <p v-if="event.is_location_public && event.city" class="text-primary-600 font-bold mt-2 relative z-10 flex items-center justify-center gap-1">
             <span>📍</span>

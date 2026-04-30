@@ -3,7 +3,7 @@
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
         <NuxtLink to="/" class="text-2xl font-bold text-primary-800 tracking-tight flex justify-center items-center gap-2">
-          Mi Regalo, Tu Fiesta
+          <IconsLogoIcon alt="Mi Regalo Tu Fiesta" class="h-12 w-auto text-primary-800" />
         </NuxtLink>
         <p class="text-stone-500 mt-2">Recupera el acceso a tu cuenta</p>
       </div>
