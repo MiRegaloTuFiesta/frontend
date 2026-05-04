@@ -2,9 +2,9 @@
   <div class="min-h-screen bg-stone-50 pb-20">
     <!-- Header -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-primary/10 mb-8">
-      <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="container mx-auto px-4 h-20 flex items-center justify-between">
         <div class="text-xl font-bold text-primary-800 tracking-tight flex items-center gap-2">
-          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-10 w-auto text-primary-800" />
+          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-14 w-auto text-primary-800" />
         </div>
       </div>
     </header>

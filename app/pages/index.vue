@@ -4,7 +4,7 @@
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-primary/10">
       <div class="container mx-auto px-4 h-16 flex items-center justify-between">
         <div class="text-xl font-bold text-primary-800 tracking-tight flex items-center gap-2">
-          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-8 w-auto text-primary-800" />
+          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-12 w-auto text-primary-800" />
         </div>
         <nav class="hidden md:flex gap-6">
           <a href="#historia" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">Nuestra Historia</a>

@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
+    wpApiUrl: process.env.WP_API_URL,
+    wpApiUser: process.env.WP_API_USER,
+    wpApiPass: process.env.WP_API_PASS,
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000'
     }

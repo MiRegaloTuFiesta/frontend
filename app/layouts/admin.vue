@@ -7,7 +7,7 @@
     >
       <div class="p-6 h-16 flex items-center justify-between border-b border-zinc-800">
         <NuxtLink to="/dashboard" class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-8 w-auto text-white" />
+          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-10 w-auto text-white" />
           <span class="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded ml-1 uppercase text-zinc-500">Admin</span>
         </NuxtLink>
         <button @click="isMobileMenuOpen = false" class="lg:hidden text-zinc-400 hover:text-white">
