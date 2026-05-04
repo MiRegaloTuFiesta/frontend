@@ -10,6 +10,7 @@
           <a href="#historia" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">Nuestra Historia</a>
           <a href="#beneficios" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">¿Por qué nosotros?</a>
           <a href="#como-funciona" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">Cómo funciona</a>
+          <a href="/b/preguntas-frecuentes-faq" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">Preguntas frecuentes</a>
         </nav>
         <div class="flex gap-4">
           <UiButton as="a" href="/login" variant="outline" class="border-primary/20 text-primary-700 hover:bg-primary-50">Ingresar</UiButton>
@@ -159,6 +160,23 @@
         </UiButton>
       </div>
     </section>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-white border-t border-zinc-100">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div class="flex items-center gap-2">
+            <IconsLogoHorizontalIcon class="h-6 w-auto text-primary-800 opacity-50" />
+            <span class="text-xs text-zinc-400 font-medium">© {{ new Date().getFullYear() }} Mi Regalo, Tu Fiesta</span>
+          </div>
+          <div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+            <a href="/b/politica-de-cookies/" class="text-xs font-semibold text-zinc-500 hover:text-primary transition-colors">Política de cookies</a>
+            <a href="/b/terminos-de-servicio/" class="text-xs font-semibold text-zinc-500 hover:text-primary transition-colors">Términos de servicio</a>
+            <a href="/b/politica-de-privacidad/" class="text-xs font-semibold text-zinc-500 hover:text-primary transition-colors">Política de privacidad</a>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 

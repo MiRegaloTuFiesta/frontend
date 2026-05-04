@@ -19,6 +19,8 @@
         <NuxtLink 
           v-for="tab in tabs" :key="tab.id"
           :to="tab.path"
+          :target="tab.id === 'wp-admin' ? '_blank' : '_self'"
+          :external="tab.id === 'wp-admin'"
           @click="isMobileMenuOpen = false"
           class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium"
           :class="$route.path === tab.path ? 'bg-zinc-800 text-white shadow-sm' : 'hover:bg-zinc-800/50 hover:text-white'"
@@ -88,6 +90,7 @@ const tabs = [
   { id: 'reports', name: 'Reportes', icon: '⚐', path: '/admin/reports' },
   { id: 'wish-templates', name: 'Plantillas de Deseos', icon: '📋', path: '/admin/wish-templates' },
   { id: 'settings', name: 'Configuración', icon: '⚙️', path: '/admin/settings' },
+  { id: 'wp-admin', name: 'Wordpress Admin', icon: '🌐', path: '/api/wp/sso-login' },
 ];
 
 const pageTitle = computed(() => {

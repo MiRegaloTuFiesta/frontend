@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     wpApiUrl: process.env.WP_API_URL,
     wpApiUser: process.env.WP_API_USER,
     wpApiPass: process.env.WP_API_PASS,
+    wpSsoSecret: process.env.SSO_SECRET,
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000'
     }
