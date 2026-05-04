@@ -28,18 +28,26 @@ export default defineEventHandler(async (event) => {
   };
 
   try {
+    // Función auxiliar para hacer fetch con fallback anónimo
+    const fetchWithFallback = async (url: string, params: any) => {
+      try {
+        return await $fetch(url, { params, headers });
+      } catch (err: any) {
+        // Si falla por autenticación (401) o prohibido (403), intentar sin headers
+        if (err.statusCode === 401 || err.statusCode === 403) {
+          console.warn(`[WP-API] Auth falló para ${url}. Reintentando como anónimo...`);
+          return await $fetch(url, { params });
+        }
+        throw err;
+      }
+    };
+
     // 1. Try to find a POST with this slug
-    let response: any = await $fetch(`${wpApiUrl}/wp-json/wp/v2/posts`, {
-      params: { slug, _embed: '1' },
-      headers,
-    });
+    let response: any = await fetchWithFallback(`${wpApiUrl}/wp-json/wp/v2/posts`, { slug, _embed: '1' });
 
     // 2. If not found, try to find a PAGE with this slug
     if (!response || response.length === 0) {
-      response = await $fetch(`${wpApiUrl}/wp-json/wp/v2/pages`, {
-        params: { slug, _embed: '1' },
-        headers,
-      });
+      response = await fetchWithFallback(`${wpApiUrl}/wp-json/wp/v2/pages`, { slug, _embed: '1' });
     }
 
     if (!response || response.length === 0) {

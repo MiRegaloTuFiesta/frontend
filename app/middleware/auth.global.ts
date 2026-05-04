@@ -4,7 +4,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const token = useCookie('auth_token');
   const publicPages = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
   const isPublicEvent = to.path.startsWith('/evento/');
-  const authRequired = (!publicPages.includes(to.path) && !isPublicEvent);
+  const isPublicBlog = to.path.startsWith('/b/');
+  const authRequired = (!publicPages.includes(to.path) && !isPublicEvent && !isPublicBlog);
 
   // 1. If not logged in and page requires auth -> redirect to login
   if (authRequired && !token.value) {
