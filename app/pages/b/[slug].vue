@@ -29,8 +29,13 @@
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-20 bg-white rounded-3xl shadow-sm border border-stone-200 px-6">
         <div class="text-stone-300 text-6xl mb-4">📄</div>
-        <h1 class="text-2xl font-bold text-stone-900 mb-2">Contenido no encontrado</h1>
-        <p class="text-stone-500 mb-8">Lo sentimos, no pudimos encontrar lo que buscabas o hubo un error de conexión.</p>
+        <h1 class="text-2xl font-bold text-stone-900 mb-2">Error cargando contenido</h1>
+        <p class="text-stone-500 mb-4">Lo sentimos, no pudimos encontrar lo que buscabas o hubo un error de conexión.</p>
+        <div class="bg-red-50 text-red-600 text-xs p-4 rounded-xl inline-block mb-8 max-w-lg mx-auto overflow-auto text-left">
+          <strong>Detalles de depuración (solo admin):</strong><br/>
+          {{ error?.statusMessage || error?.message || error }}
+        </div>
+        <br/>
         <UiButton as="a" href="/" class="bg-primary text-white">Ir al inicio</UiButton>
       </div>
 
