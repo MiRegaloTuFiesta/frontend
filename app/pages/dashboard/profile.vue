@@ -51,15 +51,41 @@
               <UiCardDescription>Actualiza tu información personal</UiCardDescription>
             </UiCardHeader>
             <UiCardContent class="space-y-6">
-              <div class="space-y-2">
-                <UiLabel for="name">Nombre Completo</UiLabel>
-                <UiInput id="name" v-model="profileForm.name" />
+              <div class="flex flex-col sm:flex-row gap-6 items-start">
+                <div class="relative group">
+                  <div class="w-24 h-24 rounded-full bg-stone-100 border-2 border-stone-200 overflow-hidden flex items-center justify-center relative">
+                    <img v-if="photoPreview" :src="photoPreview" class="w-full h-full object-cover" />
+                    <span v-else class="text-3xl">👤</span>
+                    <label class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-[10px] font-bold uppercase text-center p-2">
+                      Cambiar Foto
+                      <input type="file" class="hidden" accept="image/*" @change="onFileChange" />
+                    </label>
+                  </div>
+                  <p class="text-[10px] text-stone-400 font-bold mt-2 text-center uppercase tracking-tighter">Foto de Perfil</p>
+                </div>
+                
+                <div class="flex-1 space-y-4 w-full">
+                  <div class="space-y-2">
+                    <UiLabel for="name">Nombre Completo</UiLabel>
+                    <UiInput id="name" v-model="profileForm.name" />
+                  </div>
+                  
+                  <div class="flex items-center space-x-3 p-3 bg-stone-50 rounded-xl border border-stone-100">
+                    <input type="checkbox" id="is_public" v-model="profileForm.is_profile_photo_public" class="w-4 h-4 text-primary rounded border-stone-300 focus:ring-primary" />
+                    <div class="flex-1">
+                      <UiLabel for="is_public" class="text-xs font-bold cursor-pointer">Mostrar foto en mis eventos</UiLabel>
+                      <p class="text-[9px] text-stone-400 leading-none">Si se activa, tus invitados verán tu foto en la página del evento.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
+
               <div class="space-y-2">
                 <UiLabel for="email">Email</UiLabel>
                 <UiInput id="email" v-model="profileForm.email" type="email" />
                 <p class="text-[10px] text-amber-600 font-bold">⚠️ Si cambias tu correo, deberás verificarlo nuevamente para operar.</p>
               </div>
+              
               <div class="space-y-2">
                 <UiLabel for="phone">Teléfono de contacto</UiLabel>
                 <UiInput id="phone" v-model="profileForm.phone" placeholder="+56 9 ..." />
@@ -306,7 +332,20 @@ const profileForm = ref({
     account_type_id: user.value?.account_type_id || null,
     account_number: user.value?.account_number || '',
     bank_rut: user.value?.bank_rut || '',
+    is_profile_photo_public: user.value?.is_profile_photo_public || false,
 });
+
+const profilePhotoFile = ref<File | null>(null);
+const photoPreview = ref<string | null>(user.value?.profile_photo_url || null);
+
+const onFileChange = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+        profilePhotoFile.value = file;
+        photoPreview.value = URL.createObjectURL(file);
+    }
+};
+
 
 const passwordForm = ref({
     current_password: '',
@@ -322,14 +361,37 @@ const selectedBank = computed(() => {
 const updateProfile = async () => {
     isSaving.value = true;
     try {
+        const formData = new FormData();
+        Object.entries(profileForm.value).forEach(([key, value]) => {
+            if (value !== null) {
+                // Handle booleans for FormData
+                if (typeof value === 'boolean') {
+                    formData.append(key, value ? '1' : '0');
+                } else {
+                    formData.append(key, value as string);
+                }
+            }
+        });
+        
+        if (profilePhotoFile.value) {
+            formData.append('profile_photo', profilePhotoFile.value);
+        }
+
+        // Laravel trick for PUT with files
+        formData.append('_method', 'PUT');
+
         await $fetch(`${config.public.apiBase}/api/user/profile`, {
-            method: 'PUT',
-            headers: { Authorization: `Bearer ${token.value}` },
-            body: profileForm.value
+            method: 'POST',
+            headers: { 
+                Authorization: `Bearer ${token.value}`,
+                'Accept': 'application/json'
+            },
+            body: formData
         });
         alert('¡Perfil actualizado con éxito!');
         await refreshUser();
     } catch (err: any) {
+
         console.error(err);
         alert(err.response?._data?.message || 'Error al actualizar perfil');
     } finally {

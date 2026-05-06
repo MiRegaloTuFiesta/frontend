@@ -52,9 +52,14 @@
           <p class="text-stone-500 font-medium text-lg relative z-10">
             {{ new Date(event.date + 'T12:00:00').toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' }) }}
           </p>
-          <p v-if="event.user" class="text-stone-400 text-sm mt-2 relative z-10">
-            Anfitrión: <span class="font-semibold text-stone-600">{{ event.user.name }}</span>
-          </p>
+          <div v-if="event.user" class="text-stone-400 text-sm mt-4 relative z-10 flex flex-col items-center gap-2">
+            <div v-if="event.user.profile_photo_url" class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-100 shadow-sm">
+                <img :src="event.user.profile_photo_url" :alt="event.user.name" class="w-full h-full object-cover" />
+            </div>
+            <p>
+              Anfitrión: <span class="font-semibold text-stone-600">{{ event.user.name }}</span>
+            </p>
+          </div>
           <p v-if="event.is_location_public && event.city" class="text-primary-600 font-bold mt-2 relative z-10 flex items-center justify-center gap-1">
             <span>📍</span>
             {{ event.city.name }}{{ event.address ? ', ' + event.address : '' }}
