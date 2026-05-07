@@ -13,6 +13,7 @@
       <table class="w-full text-left">
         <thead>
           <tr class="bg-zinc-50 border-b border-zinc-100">
+            <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Avatar</th>
             <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Nombre</th>
             <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Email</th>
             <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Rol</th>
@@ -22,6 +23,12 @@
         </thead>
         <tbody>
           <tr v-for="u in usersList" :key="u.id" class="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+            <td class="p-6">
+              <div class="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 overflow-hidden flex items-center justify-center">
+                <img v-if="u.profile_photo_url" :src="u.profile_photo_url" class="w-full h-full object-cover" />
+                <span v-else class="text-xl">👤</span>
+              </div>
+            </td>
             <td class="p-6 font-bold text-zinc-900">{{ u.name }}</td>
             <td class="p-6 text-zinc-600">{{ u.email }}</td>
             <td class="p-6">
@@ -50,6 +57,26 @@
           <button @click="isUserModalOpen = false" class="text-zinc-300 hover:text-zinc-900 text-2xl transition-colors">&times;</button>
         </div>
         <form @submit.prevent="saveUser" class="p-8 space-y-6 overflow-y-auto flex-1">
+          <div class="flex items-center gap-6 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+            <div class="relative group">
+              <div class="w-20 h-20 rounded-full bg-white border-2 border-zinc-200 overflow-hidden flex items-center justify-center relative">
+                <img v-if="photoPreview" :src="photoPreview" class="w-full h-full object-cover" />
+                <span v-else class="text-2xl">👤</span>
+                <label class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-[9px] font-bold uppercase text-center p-2">
+                  Cambiar
+                  <input type="file" class="hidden" accept="image/*" @change="onFileChange" />
+                </label>
+              </div>
+            </div>
+            <div class="flex-1 space-y-3">
+              <div class="flex items-center space-x-2">
+                <input type="checkbox" id="is_public" v-vee-model="userForm.is_profile_photo_public" v-model="userForm.is_profile_photo_public" class="w-4 h-4 text-zinc-900 rounded border-zinc-300 focus:ring-zinc-900" />
+                <UiLabel for="is_public" class="text-xs font-bold cursor-pointer">Foto pública en eventos</UiLabel>
+              </div>
+              <p class="text-[9px] text-zinc-400 leading-tight">Si se activa, el usuario mostrará su foto en la lista de deseos de sus eventos.</p>
+            </div>
+          </div>
+
           <div class="space-y-3">
             <UiLabel for="userName" class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Nombre Completo</UiLabel>
             <UiInput id="userName" v-model="userForm.name" class="h-12" required />
@@ -140,21 +167,60 @@ const { data: usersList, refresh: refreshUsers, pending } = await useFetch<any>(
 
 const isUserModalOpen = ref(false);
 const editingUser = ref<any>(null);
-const userForm = ref({ name: '', email: '', phone: '', role: 'creator' });
+const userForm = ref({ name: '', email: '', phone: '', role: 'creator', is_profile_photo_public: false });
+const profilePhotoFile = ref<File | null>(null);
+const photoPreview = ref<string | null>(null);
+
+const onFileChange = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+        profilePhotoFile.value = file;
+        photoPreview.value = URL.createObjectURL(file);
+    }
+};
 
 const openUserModal = (u: any) => {
   editingUser.value = u;
-  userForm.value = { name: u.name, email: u.email, phone: u.phone || '', role: u.role };
+  userForm.value = { 
+    name: u.name, 
+    email: u.email, 
+    phone: u.phone || '', 
+    role: u.role,
+    is_profile_photo_public: u.is_profile_photo_public || false
+  };
+  photoPreview.value = u.profile_photo_url || null;
+  profilePhotoFile.value = null;
   isUserModalOpen.value = true;
 };
 
 const saveUser = async () => {
   if (!editingUser.value) return;
   try {
+    const formData = new FormData();
+    Object.entries(userForm.value).forEach(([key, value]) => {
+        if (value !== null) {
+            if (typeof value === 'boolean') {
+                formData.append(key, value ? '1' : '0');
+            } else {
+                formData.append(key, value as string);
+            }
+        }
+    });
+
+    if (profilePhotoFile.value) {
+        formData.append('profile_photo', profilePhotoFile.value);
+    }
+
+    // Laravel trick for PUT with files
+    formData.append('_method', 'PUT');
+
     await $fetch(`${config.public.apiBase}/api/admin/users/${editingUser.value.id}`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token.value}` },
-      body: userForm.value
+      method: 'POST',
+      headers: { 
+        Authorization: `Bearer ${token.value}`,
+        'Accept': 'application/json'
+      },
+      body: formData
     });
     isUserModalOpen.value = false;
     await refreshUsers();
