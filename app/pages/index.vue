@@ -12,11 +12,38 @@
           <a href="#como-funciona" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">Cómo funciona</a>
           <a href="/b/preguntas-frecuentes-faq" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">Preguntas frecuentes</a>
         </nav>
-        <div class="flex gap-4">
-          <UiButton as="a" href="/login" variant="outline" class="border-primary/20 text-primary-700 hover:bg-primary-50">Ingresar</UiButton>
-          <UiButton as="a" href="/register" class="bg-primary hover:bg-primary-700 text-white shadow-lg shadow-primary/20 transition-all">Crear Evento</UiButton>
+        <div class="flex items-center gap-2">
+          <UiButton as="a" href="/login" variant="outline" class="border-primary/20 text-primary-700 hover:bg-primary-50 h-9 px-4 text-xs font-bold">Ingresar</UiButton>
+          <UiButton as="a" href="/register" class="hidden md:flex bg-primary hover:bg-primary-700 text-white shadow-lg shadow-primary/20 transition-all">Crear Evento</UiButton>
+          
+          <!-- Botón Menú Móvil -->
+          <button @click="isMenuOpen = !isMenuOpen" class="md:hidden p-2 text-primary-800 hover:bg-primary-50 rounded-lg transition-colors">
+            <svg v-if="!isMenuOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
         </div>
       </div>
+
+      <!-- Menú Móvil Desplegable -->
+      <transition 
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-4"
+      >
+        <div v-if="isMenuOpen" class="md:hidden bg-white border-b border-primary/10 shadow-xl overflow-hidden">
+          <nav class="container mx-auto px-6 py-8 flex flex-col gap-6">
+            <a href="#historia" @click="isMenuOpen = false" class="text-lg font-bold text-zinc-900 hover:text-primary transition-colors">Nuestra Historia</a>
+            <a href="#beneficios" @click="isMenuOpen = false" class="text-lg font-bold text-zinc-900 hover:text-primary transition-colors">¿Por qué nosotros?</a>
+            <a href="#como-funciona" @click="isMenuOpen = false" class="text-lg font-bold text-zinc-900 hover:text-primary transition-colors">Cómo funciona</a>
+            <a href="/b/preguntas-frecuentes-faq" class="text-lg font-bold text-zinc-900 hover:text-primary transition-colors">Preguntas frecuentes</a>
+            <hr class="border-zinc-100">
+            <UiButton as="a" href="/register" class="bg-primary hover:bg-primary-700 text-white shadow-lg h-12 text-base font-bold">Crear Mi Evento Gratis</UiButton>
+          </nav>
+        </div>
+      </transition>
     </header>
 
     <!-- Hero Section -->
@@ -204,6 +231,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+
+const isMenuOpen = ref(false);
+
 // SEO Meta configuration
 useHead({
   title: 'Mi Regalo, Tu Fiesta - El alma de la celebración',
