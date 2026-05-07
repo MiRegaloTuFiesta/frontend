@@ -152,6 +152,7 @@
                   </div>
                   <UiCardDescription>
                     Fecha: {{ new Date(evt.date + 'T12:00:00').toLocaleDateString('es-CL') }}
+                    <span class="block text-[10px] text-stone-400 mt-0.5 italic">Creado el: {{ new Date(evt.created_at).toLocaleDateString('es-CL') }}</span>
                     <span v-if="evt.city" class="block text-xs text-stone-400 mt-1">📍 {{ evt.city.name }}, {{ evt.city.region?.name }}</span>
                     <div v-if="evt.requests_internal_service" class="mt-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-bold uppercase tracking-wider">
                       🔧 Servicio Solicitado{{ evt.service_cost > 0 ? ': $' + formatNumber(evt.service_cost) : '' }}
