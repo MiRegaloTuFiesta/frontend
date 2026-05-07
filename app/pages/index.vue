@@ -13,7 +13,7 @@
           <a href="/b/preguntas-frecuentes-faq" class="text-sm font-medium text-zinc-600 hover:text-primary transition-colors">Preguntas frecuentes</a>
         </nav>
         <div class="flex items-center gap-2">
-          <UiButton as="a" href="/login" variant="outline" class="border-primary/20 text-primary-700 hover:bg-primary-50 h-9 px-4 text-xs font-bold">Ingresar</UiButton>
+          <UiButton as="a" href="/login" variant="outline" class="border-primary/20 text-primary-700 hover:bg-primary-50 h-9 px-4 font-bold">Ingresar</UiButton>
           <UiButton as="a" href="/register" class="hidden md:flex bg-primary hover:bg-primary-700 text-white shadow-lg shadow-primary/20 transition-all">Crear Evento</UiButton>
           
           <!-- Botón Menú Móvil -->
