@@ -11,22 +11,46 @@
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="flex gap-1 bg-zinc-100 p-1 rounded-xl w-fit ml-2">
-      <button 
-        @click="activeTab = 'pending'" 
-        :class="activeTab === 'pending' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
-        class="px-6 py-2 rounded-lg text-xs font-black uppercase transition-all"
-      >
-        Pendientes
-      </button>
-      <button 
-        @click="activeTab = 'history'" 
-        :class="activeTab === 'history' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
-        class="px-6 py-2 rounded-lg text-xs font-black uppercase transition-all"
-      >
-        Historial
-      </button>
+    <!-- Tabs & Search -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
+      <div class="flex gap-1 bg-zinc-100 p-1 rounded-xl w-fit">
+        <button 
+          @click="activeTab = 'pending'" 
+          :class="activeTab === 'pending' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
+          class="px-6 py-2 rounded-lg text-xs font-black uppercase transition-all"
+        >
+          Pendientes
+        </button>
+        <button 
+          @click="activeTab = 'history'" 
+          :class="activeTab === 'history' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
+          class="px-6 py-2 rounded-lg text-xs font-black uppercase transition-all"
+        >
+          Historial
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="relative flex-1 md:w-64">
+          <input 
+            v-model="searchQuery" 
+            type="text" 
+            placeholder="Buscar por nombre o email..." 
+            class="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+          />
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">🔍</span>
+        </div>
+        <button 
+          v-if="activeTab === 'history'"
+          @click="toggleSort"
+          class="h-9 px-3 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-all text-xs font-black flex items-center gap-2 uppercase tracking-tight"
+          :title="sortOrder === 'desc' ? 'Más recientes primero' : 'Más antiguos primero'"
+        >
+          <span>Fecha</span>
+          <span v-if="sortOrder === 'desc'">▼</span>
+          <span v-else>▲</span>
+        </button>
+      </div>
     </div>
 
     <div v-if="pendingPayouts || pendingHistory" class="flex flex-col gap-4">
@@ -34,7 +58,7 @@
     </div>
 
     <div v-else-if="activeTab === 'pending'">
-        <div v-if="payouts && payouts.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div v-if="filteredPayouts && filteredPayouts.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-zinc-50 border-b border-zinc-100">
@@ -46,7 +70,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="p in payouts" :key="p.user_id" class="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors group">
+              <tr v-for="p in filteredPayouts" :key="p.user_id" class="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors group">
                 <td class="p-6">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-lg shadow-inner">👤</div>
@@ -108,7 +132,7 @@
     </div>
 
     <div v-else-if="activeTab === 'history'">
-        <div v-if="history && history.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div v-if="filteredHistory && filteredHistory.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-zinc-50 border-b border-zinc-100">
@@ -120,7 +144,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="h in history" :key="h.user_id + h.deposited_at" class="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+              <tr v-for="h in filteredHistory" :key="h.user_id + h.deposited_at" class="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
                 <td class="p-6">
                     <p class="text-sm font-bold text-zinc-900">{{ h.deposited_at }}</p>
                 </td>
@@ -359,6 +383,8 @@ definePageMeta({ layout: 'admin' });
 const token = useCookie('auth_token');
 const config = useRuntimeConfig();
 const activeTab = ref('pending');
+const searchQuery = ref('');
+const sortOrder = ref<'asc' | 'desc'>('desc');
 
 // Data Fetching
 const { data: payouts, refresh, pending: pendingPayouts } = await useFetch<any>(`${config.public.apiBase}/api/admin/payouts`, {
@@ -371,6 +397,47 @@ const { data: history, refresh: refreshHistory, pending: pendingHistory } = awai
 
 const { data: settings } = await useFetch<any>(`${config.public.apiBase}/api/settings/public`);
 const payoutDays = computed(() => settings.value?.payout_days || '3');
+
+// Computed filters & sort
+const filteredPayouts = computed(() => {
+    if (!payouts.value) return [];
+    let list = [...payouts.value];
+    
+    if (searchQuery.value) {
+        const q = searchQuery.value.toLowerCase();
+        list = list.filter(p => 
+            p.user_name.toLowerCase().includes(q) || 
+            p.user_email.toLowerCase().includes(q)
+        );
+    }
+    
+    return list;
+});
+
+const filteredHistory = computed(() => {
+    if (!history.value) return [];
+    let list = [...history.value];
+    
+    if (searchQuery.value) {
+        const q = searchQuery.value.toLowerCase();
+        list = list.filter(h => 
+            h.user_name.toLowerCase().includes(q) || 
+            h.user_email.toLowerCase().includes(q)
+        );
+    }
+    
+    list.sort((a, b) => {
+        const dateA = new Date(a.deposited_at_raw).getTime();
+        const dateB = new Date(b.deposited_at_raw).getTime();
+        return sortOrder.value === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+    
+    return list;
+});
+
+const toggleSort = () => {
+    sortOrder.value = sortOrder.value === 'desc' ? 'asc' : 'desc';
+};
 
 // UI State
 const selectedPayout = ref<any>(null);
