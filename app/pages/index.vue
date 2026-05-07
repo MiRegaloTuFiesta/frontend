@@ -20,32 +20,55 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="relative px-4 py-20 md:py-32 overflow-hidden flex items-center justify-center min-h-[85vh]">
+    <section class="relative px-4 py-20 md:py-32 overflow-hidden flex flex-col items-center justify-center min-h-[90vh]">
       <!-- Background Image -->
       <div class="absolute inset-0 z-0">
         <img src="/images/hero.webp" alt="Fiesta y celebración" class="w-full h-full object-cover" />
-        <div class="absolute inset-0 bg-stone-950/75"></div> <!-- Overlay oscuro para constraste -->
+        <div class="absolute inset-0 bg-stone-950/80"></div> <!-- Overlay oscuro para contraste -->
       </div>
 
       <div class="container mx-auto text-center max-w-4xl relative z-10 pt-10">
-        <span class="px-4 py-1.5 rounded-full bg-primary-500/20 text-primary-200 border border-primary-500/30 text-sm font-semibold tracking-wide mb-6 inline-block backdrop-blur-sm">
-          El alma de la celebración
-        </span>
         <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-8 drop-shadow-lg text-balance">
           Un regalo con sentido es aquel que se <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-200">vive, comparte y recuerda</span>
         </h1>
-        <p class="text-lg md:text-xl text-stone-300 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-          Transformamos el acto de regalar en un esfuerzo colectivo. No es solo "pedir dinero"; es compartir el sueño de una noche especial.
+        
+        <p class="text-lg md:text-xl text-stone-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+          Transformamos el acto de regalar en un esfuerzo colectivo.<br>
+          No es solo "pedir dinero", es compartir el sueño de una noche especial.
         </p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <UiButton size="lg" class="w-full sm:w-auto text-lg h-14 px-8 bg-primary hover:bg-primary-600 text-white shadow-xl shadow-primary/20 transition-all hover:scale-105 border-0" as="a" href="/register">
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+          <UiButton size="lg" class="w-full sm:w-auto text-lg h-14 px-10 bg-primary hover:bg-primary-600 text-white shadow-2xl shadow-primary/50 transition-all hover:scale-105 border-2 border-white/20 hover:border-white/40 font-bold" as="a" href="/register">
             Comenzar mi evento gratis
           </UiButton>
           <UiButton size="lg" class="w-full sm:w-auto text-lg h-14 px-8 bg-transparent border-2 border-white/40 hover:bg-white/15 text-white shadow-none backdrop-blur-sm hover:border-white/80 transition-all font-medium" as="a" href="#historia">
             Nuestra historia
           </UiButton>
         </div>
-        <p class="mt-8 text-sm text-stone-400 font-medium tracking-wide">Sin compromisos vacíos &bull; Cambiamos lo material por lo emocional</p>
+
+        <!-- Features Bar -->
+        <div class="grid md:grid-cols-3 gap-8 md:gap-0 max-w-5xl mx-auto relative">
+          <!-- Item 1 -->
+          <div class="px-6 space-y-4 md:border-r md:border-white/10">
+            <div class="text-primary-400 text-3xl">❤️</div>
+            <h3 class="text-white font-bold text-lg">Con amor y propósito</h3>
+            <p class="text-stone-400 text-xs leading-relaxed">Cada aporte hace la diferencia y se transforma en momentos inolvidables.</p>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="px-6 space-y-4 md:border-r md:border-white/10">
+            <div class="text-primary-400 text-3xl">👥</div>
+            <h3 class="text-white font-bold text-lg">Comunidad que suma</h3>
+            <p class="text-stone-400 text-xs leading-relaxed">Tus invitados son parte real de tu celebración. Juntos hacen posible tu fiesta.</p>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="px-6 space-y-4">
+            <div class="text-primary-400 text-3xl">🛡️</div>
+            <h3 class="text-white font-bold text-lg">Transparente y seguro</h3>
+            <p class="text-stone-400 text-xs leading-relaxed">Plataforma confiable para ti y tus invitados.</p>
+          </div>
+        </div>
       </div>
     </section>
 
