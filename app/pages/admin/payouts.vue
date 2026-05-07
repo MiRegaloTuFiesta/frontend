@@ -58,8 +58,8 @@
     </div>
 
     <div v-else-if="activeTab === 'pending'">
-        <div v-if="filteredPayouts && filteredPayouts.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
-          <table class="w-full text-left border-collapse">
+        <div v-if="filteredPayouts && filteredPayouts.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr class="bg-zinc-50 border-b border-zinc-100">
                 <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Usuario</th>
@@ -132,8 +132,8 @@
     </div>
 
     <div v-else-if="activeTab === 'history'">
-        <div v-if="filteredHistory && filteredHistory.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
-          <table class="w-full text-left border-collapse">
+        <div v-if="filteredHistory && filteredHistory.length > 0" class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr class="bg-zinc-50 border-b border-zinc-100">
                 <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Fecha Depósito</th>

@@ -10,8 +10,8 @@
         <UiButton @click="openBankModal()" class="bg-zinc-900 text-white">Nuevo Banco</UiButton>
       </div>
 
-      <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
-        <table class="w-full text-left">
+      <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden overflow-x-auto">
+        <table class="w-full text-left min-w-[600px]">
           <thead>
             <tr class="bg-zinc-50 border-b border-zinc-100">
               <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Banco</th>

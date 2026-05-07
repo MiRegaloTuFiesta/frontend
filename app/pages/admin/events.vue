@@ -39,8 +39,8 @@
       <div v-if="pending" class="text-zinc-400 animate-spin text-xl self-end mb-2">🔄</div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
-      <table class="w-full text-left">
+    <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden overflow-x-auto">
+      <table class="w-full text-left min-w-[800px]">
         <thead>
           <tr class="bg-zinc-50 border-b border-zinc-100">
             <th class="p-6 text-xs font-bold uppercase tracking-widest text-zinc-400">Evento y UUID</th>

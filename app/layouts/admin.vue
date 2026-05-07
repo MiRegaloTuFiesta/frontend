@@ -5,12 +5,12 @@
       class="fixed inset-y-0 left-0 z-50 w-64 bg-zinc-900 text-zinc-300 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0"
       :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
     >
-      <div class="p-6 h-16 flex items-center justify-between border-b border-zinc-800">
-        <NuxtLink to="/dashboard" class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-10 w-auto text-white" />
-          <span class="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded ml-1 uppercase text-zinc-500">Admin</span>
+      <div class="p-6 h-16 flex items-center justify-between border-b border-zinc-800 relative">
+        <NuxtLink to="/dashboard" class="text-xl font-bold text-white tracking-tight flex items-center gap-2 overflow-hidden">
+          <IconsLogoHorizontalIcon alt="Mi Regalo Tu Fiesta" class="h-10 w-auto text-white shrink-0" />
+          <span class="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded ml-1 uppercase text-zinc-500 shrink-0">Admin</span>
         </NuxtLink>
-        <button @click="isMobileMenuOpen = false" class="lg:hidden text-zinc-400 hover:text-white">
+        <button @click="isMobileMenuOpen = false" class="lg:hidden text-zinc-400 hover:text-white shrink-0 ml-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </div>
