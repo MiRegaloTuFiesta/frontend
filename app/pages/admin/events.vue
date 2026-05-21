@@ -311,6 +311,10 @@
 
           <!-- Tab: Transferencias Bancarias -->
           <div v-if="activeTab === 'transfers'" class="space-y-6">
+            <div v-if="selectedEvent.user?.is_currently_blocked" class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-[11px] text-rose-700 font-bold leading-tight flex items-center gap-2">
+              <span>⚠️</span>
+              <span>ATENCIÓN: El creador de este evento está actualmente BLOQUEADO. Ten precaución al gestionar e ingresar transacciones.</span>
+            </div>
             <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100 italic text-[11px] text-amber-700 leading-tight">
               Acepta los aportes realizados por transferencia bancaria tras confirmar el depósito en la cuenta del comercio. Esto marcará el deseo como completado.
             </div>

@@ -75,7 +75,10 @@
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-lg shadow-inner">👤</div>
                     <div class="cursor-pointer group/user" @click="showingUserModal = p">
-                      <p class="font-black text-zinc-900 leading-none group-hover/user:text-primary-600 transition-colors">{{ p.user_name }}</p>
+                      <p class="font-black text-zinc-900 leading-none group-hover/user:text-primary-600 transition-colors">
+                        {{ p.user_name }}
+                        <span v-if="p.is_currently_blocked" class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[9px] font-black uppercase tracking-wider">Bloqueado</span>
+                      </p>
                       <p class="text-[11px] text-zinc-400 mt-1">{{ p.user_email }}</p>
                     </div>
                   </div>
@@ -263,6 +266,10 @@
             <h3 class="text-xl font-black text-zinc-900">Confirmar Depósito</h3>
             <p class="text-sm text-zinc-500">¿Ya realizaste la transferencia bancaria?</p>
         </div>
+        <div v-if="selectedPayout.is_currently_blocked" class="mx-8 mt-6 bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl text-xs font-bold flex items-center gap-2">
+            <span>⚠️</span>
+            <span>ATENCIÓN: Este creador está actualmente BLOQUEADO temporal o permanentemente. Proceder con precaución.</span>
+        </div>
         <div class="p-8 space-y-6">
             <div class="bg-zinc-900 text-white p-6 rounded-2xl flex items-center justify-between shadow-xl shadow-zinc-900/20">
                 <div>
@@ -332,6 +339,11 @@
                 
                 <h3 class="text-2xl font-black text-zinc-900 leading-tight">{{ showingUserModal.user_name }}</h3>
                 <p class="text-zinc-400 font-bold text-sm tracking-wide">{{ showingUserModal.user_email }}</p>
+
+                <div v-if="showingUserModal.is_currently_blocked" class="mt-4 bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2">
+                    <span>⚠️</span>
+                    <span>Este creador se encuentra BLOQUEADO.</span>
+                </div>
                 
                 <div class="mt-8 grid grid-cols-1 gap-4 text-left">
                     <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
