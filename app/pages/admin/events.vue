@@ -98,6 +98,9 @@
                   <span class="hidden md:inline">Compartir</span><span class="md:hidden">Compartir</span>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </UiButton>
+                <UiButton @click="openChat(evt)" size="sm" variant="outline" class="font-bold flex items-center gap-1.5 bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100">
+                  💬 Chat
+                </UiButton>
                 <UiButton @click="openApprovalModal(evt)" size="sm" variant="secondary" class="font-bold">Gestionar</UiButton>
               </div>
             </td>
@@ -146,6 +149,13 @@
             <span v-if="pendingTransfers?.length > 0" class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-[10px]">
               {{ pendingTransfers.length }}
             </span>
+          </button>
+          <button 
+            @click="activeTab = 'chat'" 
+            :class="activeTab === 'chat' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-zinc-400 hover:text-zinc-600'"
+            class="py-4 px-6 border-b-2 font-bold text-sm transition-all flex items-center gap-1.5"
+          >
+            💬 Chat
           </button>
         </div>
 
@@ -214,13 +224,13 @@
               </select>
             </div>
 
-            <div class="space-y-3">
-              <UiLabel for="adminNotes" class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Notas del Administrador (Solo para Creador)</UiLabel>
+            <div v-if="selectedEvent.status === 'pending'" class="space-y-3">
+              <UiLabel for="adminNotes" class="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Nota inicial / Mensaje de revisión (Se enviará al chat)</UiLabel>
               <textarea 
                 id="adminNotes" 
                 v-model="approvalForm.admin_notes" 
-                placeholder="Escribe un mensaje o recomendación para el creador del evento..."
-                class="w-full h-32 p-4 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-medium focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+                placeholder="Escribe un mensaje de bienvenida o recomendación inicial para el creador..."
+                class="w-full h-24 p-4 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-medium focus:ring-2 focus:ring-primary-500 outline-none resize-none"
               ></textarea>
             </div>
             
@@ -351,6 +361,76 @@
               <p class="text-xs text-zinc-400">No hay transferencias pendientes para este evento.</p>
             </div>
           </div>
+
+          <!-- Tab: Chat con Creador -->
+          <div v-if="activeTab === 'chat'" class="flex flex-col h-[400px] max-h-[50vh] -mx-8 -my-8">
+            <!-- Messages List -->
+            <div ref="chatScrollContainer" class="flex-grow overflow-y-auto p-6 bg-stone-50/50 space-y-4">
+              <div v-if="isLoadingMessages && chatMessages.length === 0" class="flex flex-col items-center justify-center py-12">
+                <div class="animate-spin text-2xl text-stone-400 animate-bounce">🔄</div>
+                <p class="text-xs text-stone-400 mt-2">Cargando chat...</p>
+              </div>
+              <div v-else-if="chatMessages.length === 0" class="text-center py-12 text-stone-400 italic text-xs">
+                No hay mensajes en este chat. Escribe un mensaje abajo para iniciar la conversación con el creador.
+              </div>
+              <div v-else class="space-y-4">
+                <div v-for="msg in chatMessages" :key="msg.id" class="flex flex-col" :class="msg.sender_id === currentUser?.id ? 'items-end' : 'items-start'">
+                  <!-- Sender details -->
+                  <span class="text-[9px] font-black text-stone-400 uppercase mb-1 px-1">
+                    {{ msg.sender_id === currentUser?.id ? 'Tú (Soporte)' : `${msg.sender?.name} (Creador)` }}
+                  </span>
+                  
+                  <!-- Message Bubble -->
+                  <div 
+                    class="max-w-[85%] rounded-2xl px-4 py-2.5 text-xs shadow-sm flex flex-col gap-1"
+                    :class="msg.sender_id === currentUser?.id 
+                      ? 'bg-zinc-900 text-white rounded-tr-none' 
+                      : 'bg-white border border-stone-200 text-stone-800 rounded-tl-none'"
+                  >
+                    <!-- Reference Badge -->
+                    <div v-if="msg.event" class="text-[9px] font-black opacity-85 pb-1 border-b border-current/25 flex items-center gap-1 mb-0.5">
+                      <span>📌</span>
+                      <span>Ref: {{ msg.event.name }}</span>
+                    </div>
+                    <p class="whitespace-pre-wrap leading-relaxed">{{ msg.message }}</p>
+                  </div>
+
+                  <!-- Timestamp -->
+                  <span class="text-[9px] text-stone-400 mt-1 px-1 flex items-center gap-1">
+                    <span>{{ new Date(msg.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) }}</span>
+                    <span v-if="msg.sender_id === currentUser?.id" class="text-[9px] font-bold text-emerald-600">{{ msg.is_read ? '✓✓ Leído' : '✓ Enviado' }}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attached event badge in input area -->
+            <div class="px-4 py-2 bg-stone-50 border-t border-stone-100 flex items-center text-xs text-stone-500 font-medium gap-1.5 shrink-0">
+              <span>📌</span>
+              <span>Adjuntando referencia de: <strong class="text-stone-700">{{ selectedEvent.name }}</strong></span>
+            </div>
+
+            <!-- Send Input Area -->
+            <div class="p-4 border-t border-stone-100 bg-white shrink-0">
+              <form @submit.prevent="sendChatMessage" class="flex gap-2 items-center">
+                <UiInput 
+                  v-model="newChatMessage" 
+                  placeholder="Escribe un respuesta..." 
+                  class="flex-grow h-11 border-stone-200 focus:ring-zinc-900 focus:border-zinc-900"
+                  :disabled="isSendingMessage"
+                  required
+                  autocomplete="off"
+                />
+                <UiButton 
+                  type="submit" 
+                  class="bg-zinc-900 text-white hover:bg-zinc-800 h-11 px-5 rounded-xl font-bold transition-all shrink-0 flex items-center gap-1.5"
+                  :disabled="isSendingMessage || !newChatMessage.trim()"
+                >
+                  <span>{{ isSendingMessage ? '...' : 'Enviar' }}</span>
+                </UiButton>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -358,7 +438,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick, watch } from 'vue';
 import { useCookie, useRuntimeConfig, useFetch } from '#imports';
 import { refDebounced } from '@vueuse/core';
 
@@ -368,6 +448,10 @@ const token = useCookie('auth_token');
 const config = useRuntimeConfig();
 
 const { data: globalSettings } = await useFetch<any>(`${config.public.apiBase}/api/admin/settings`, {
+  headers: { Authorization: `Bearer ${token.value}` }
+});
+
+const { data: currentUser } = await useFetch<any>(`${config.public.apiBase}/api/user`, {
   headers: { Authorization: `Bearer ${token.value}` }
 });
 
@@ -437,7 +521,7 @@ const openApprovalModal = async (evt: any) => {
   selectedEvent.value = evt;
   approvalForm.value = { 
     total_price: evt.total_price || 0,
-    admin_notes: evt.admin_notes || '',
+    admin_notes: '',
     assigned_admin_id: evt.assigned_admin_id || null,
     service_cost: evt.service_cost || 0,
     service_adds_to_total: evt.service_adds_to_total || false
@@ -520,6 +604,84 @@ const closeApprovalModal = () => {
   selectedEvent.value = null;
   manualPayments.value = [];
 };
+
+// Chat global por evento
+const chatMessages = ref<any[]>([]);
+const newChatMessage = ref('');
+const isSendingMessage = ref(false);
+const isLoadingMessages = ref(false);
+const chatScrollContainer = ref<HTMLElement | null>(null);
+
+const openChat = async (evt: any) => {
+  await openApprovalModal(evt);
+  activeTab.value = 'chat';
+};
+
+const fetchChatMessages = async () => {
+  if (!selectedEvent.value) return;
+  isLoadingMessages.value = true;
+  try {
+    const res: any = await $fetch(`${config.public.apiBase}/api/support-chat/${selectedEvent.value.user_id}`, {
+      headers: { Authorization: `Bearer ${token.value}` }
+    });
+    chatMessages.value = res;
+    scrollToBottom();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isLoadingMessages.value = false;
+  }
+};
+
+const sendChatMessage = async () => {
+  if (!newChatMessage.value.trim() || isSendingMessage.value || !selectedEvent.value) return;
+  isSendingMessage.value = true;
+  try {
+    const res: any = await $fetch(`${config.public.apiBase}/api/support-chat/${selectedEvent.value.user_id}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token.value}` },
+      body: { 
+        message: newChatMessage.value,
+        event_id: selectedEvent.value.id // Attach the event context
+      }
+    });
+    chatMessages.value.push(res);
+    newChatMessage.value = '';
+    scrollToBottom();
+  } catch (err) {
+    console.error(err);
+    alert('Error al enviar mensaje');
+  } finally {
+    isSendingMessage.value = false;
+  }
+};
+
+const markMessagesAsRead = async () => {
+  if (!selectedEvent.value) return;
+  try {
+    await $fetch(`${config.public.apiBase}/api/support-chat/${selectedEvent.value.user_id}/read`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token.value}` }
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (chatScrollContainer.value) {
+      chatScrollContainer.value.scrollTop = chatScrollContainer.value.scrollHeight;
+    }
+  });
+};
+
+watch(activeTab, async (newVal) => {
+  if (newVal === 'chat' && selectedEvent.value) {
+    await fetchChatMessages();
+    await markMessagesAsRead();
+  }
+});
 
 const rejectEvent = async () => {
   if (!selectedEvent.value) return;

@@ -88,6 +88,7 @@ const tabs = [
   { id: 'categories', name: 'Categorías', icon: '🏷️', path: '/admin/categories' },
   { id: 'banks', name: 'Bancos y Cuentas', icon: '🏦', path: '/admin/banks' },
   { id: 'reports', name: 'Reportes', icon: '⚐', path: '/admin/reports' },
+  { id: 'support', name: 'Chat de Soporte', icon: '💬', path: '/admin/support' },
   { id: 'wish-templates', name: 'Plantillas de Deseos', icon: '📋', path: '/admin/wish-templates' },
   { id: 'settings', name: 'Configuración', icon: '⚙️', path: '/admin/settings' },
   { id: 'wp-admin', name: 'Wordpress Admin', icon: '🌐', path: '/api/wp/sso-login' },
